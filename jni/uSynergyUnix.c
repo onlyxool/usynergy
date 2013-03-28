@@ -25,12 +25,12 @@ freely, subject to the following restrictions:
 */
 
 #include "uSynergy.h"
-
+#include <stdio.h>
 // TODO: implement callbacks.
 int main(char* argv, int argc) {
 	uSynergyContext context;
 	uSynergyInit(&context);
-	
+
 	for(;;) {
 		uSynergyUpdate(&context);
 	}

@@ -420,7 +420,7 @@ static void sProcessMessage(uSynergyContext *context, const uint8_t *message)
 			uint32_t format	= sNetToNative32(parse_msg);
 			uint32_t size	= sNetToNative32(parse_msg+4);
 			parse_msg += 8;
-			
+
 			// Call callback
 			if (context->m_clipboardCallback)
 				context->m_clipboardCallback(context->m_cookie, format, parse_msg, size);
@@ -612,7 +612,7 @@ void uSynergySendClipboard(uSynergyContext *context, const char *text)
 								4 +					/* Clipboard format */
 								4;					/* Clipboard data length */
 	uint32_t max_length = USYNERGY_REPLY_BUFFER_SIZE - overhead_size;
-	
+
 	// Clip text to max length
 	uint32_t text_length = (uint32_t)strlen(text);
 	if (text_length > max_length)
