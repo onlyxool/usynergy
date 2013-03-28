@@ -1,0 +1,7 @@
+[  0%] Building C object src/micro/CMakeFiles/micro.dir/uSynergy.o
+Linking C static library ../../../../lib/libmicro.a
+[  0%] Built target micro
+[100%] Building C object src/cmd/usynergy/CMakeFiles/usynergy.dir/uSynergyUnix.o
+Linking C executable ../../../../../bin/usynergy
+[100%] Built target usynergy
+
