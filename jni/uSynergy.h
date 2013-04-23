@@ -24,6 +24,8 @@ freely, subject to the following restrictions:
    distribution.
 */
 #include <stdint.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -78,7 +80,11 @@ typedef int			uSynergyBool;
 The uSynergyCookie type is an opaque type that is used by uSynergy to communicate to the client. It is passed along to
 callback functions as context.
 **/
-typedef struct { int ignored; } *					uSynergyCookie;
+typedef struct {
+	int sockfd;
+	char *server_name;
+	struct sockaddr_in server_addr;
+} *uSynergyCookie;
 
 
 
@@ -145,7 +151,7 @@ so the implementation of the function must close any old connections and clean u
 
 @param cookie		Cookie supplied in the Synergy context
 **/
-typedef uSynergyBool (*uSynergyConnectFunc)(uSynergyCookie cookie);
+uSynergyBool uSynergyConnectFunc(uSynergyCookie cookie);
 
 
 
@@ -160,7 +166,7 @@ operation is completed.
 @param buffer		Address of buffer to send
 @param length		Length of buffer to send
 **/
-typedef uSynergyBool (*uSynergySendFunc)(uSynergyCookie cookie, const uint8_t *buffer, int length);
+uSynergyBool uSynergySendFunc(uSynergyCookie cookie, const uint8_t *buffer, int length);
 
 
 
@@ -177,7 +183,7 @@ assumed that the connection is alive, but still in a connecting state and needs 
 @param maxLength	Maximum amount of bytes to write into the receive buffer
 @param outLength	Address of integer that receives the actual amount of bytes written into @a buffer
 **/
-typedef uSynergyBool (*uSynergyReceiveFunc)(uSynergyCookie cookie, uint8_t *buffer, int maxLength, int* outLength);
+uSynergyBool uSynergyReceiveFunc(uSynergyCookie cookie, uint8_t *buffer, int maxLength, int* outLength);
 
 
 
@@ -203,7 +209,7 @@ have occured. The time base should be a cyclic millisecond time value.
 
 @returns			Time value in milliseconds
 **/
-typedef uint32_t	(*uSynergyGetTimeFunc)();
+uint32_t	uSynergyGetTimeFunc();
 
 
 
@@ -211,7 +217,7 @@ typedef uint32_t	(*uSynergyGetTimeFunc)();
 @brief Trace function
 
 This function is called when uSynergy wants to trace something. It is optional to show these messages, but they
-are often useful when debugging. uSynergy only traces major events like connecting and disconnecting. Usually
+are often useful when debugging. uSynergy onli traces major events like connecting and disconnecting. Usually
 only a single trace is shown when the connection is established and no more trace are called.
 
 @param cookie		Cookie supplied in the Synergy context
@@ -317,11 +323,12 @@ typedef void		(*uSynergyClipboardCallback)(uSynergyCookie cookie, enum uSynergyC
 typedef struct
 {
 	/* Mandatory configuration data, filled in by client */
-	uSynergyConnectFunc				m_connectFunc;									/* Connect function */
-	uSynergySendFunc				m_sendFunc;										/* Send data function */
-	uSynergyReceiveFunc				m_receiveFunc;									/* Receive data function */
+	uSynergyBool (*m_connectFunc)(uSynergyCookie cookie);	/* Connect function */
+	uSynergyBool (*m_sendFunc)(uSynergyCookie cookie, const uint8_t *buffer, int length);	/* Send data function */
+	uSynergyBool (*m_receiveFunc)(uSynergyCookie cookie,
+		uint8_t *buffer, int maxLength, int* outLength);	/* Receive data function */
 	uSynergySleepFunc				m_sleepFunc;									/* Thread sleep function */
-	uSynergyGetTimeFunc				m_getTimeFunc;									/* Get current time function */
+	uint32_t    (*m_getTimeFunc)();							/* Get current time function */
 	const char*						m_clientName;									/* Name of Synergy Screen / Client */
 	uint16_t						m_clientWidth;									/* Width of screen */
 	uint16_t						m_clientHeight;									/* Height of screen */

@@ -238,6 +238,7 @@ static void sProcessMessage(uSynergyContext *context, const uint8_t *message)
 		// Screen info. Reply with DINF
 		//		kMsgQInfo			= "QINF"
 		//		kMsgDInfo			= "DINF%2i%2i%2i%2i%2i%2i%2i"
+		printf("QINF\n");
 		uint16_t x = 0, y = 0, warp = 0;
 		sAddString(context, "DINF");
 		sAddUInt16(context, x);
@@ -254,12 +255,14 @@ static void sProcessMessage(uSynergyContext *context, const uint8_t *message)
 	{
 		// Do nothing?
 		//		kMsgCInfoAck		= "CIAK"
+		printf("CIAK\n");
 		return;
 	}
 	else if (USYNERGY_IS_PACKET("CROP"))
 	{
 		// Do nothing?
 		//		kMsgCResetOptions	= "CROP"
+		printf("CROP\n");
 		return;
 	}
 	else if (USYNERGY_IS_PACKET("CINN"))
@@ -268,6 +271,7 @@ static void sProcessMessage(uSynergyContext *context, const uint8_t *message)
 		//		kMsgCEnter 			= "CINN%2i%2i%4i%2i"
 
 		// Obtain the Synergy sequence number
+		printf("CINN\n");
 		context->m_sequenceNumber = sNetToNative32(message + 12);
 		context->m_isCaptured = USYNERGY_TRUE;
 
@@ -279,6 +283,7 @@ static void sProcessMessage(uSynergyContext *context, const uint8_t *message)
 	{
 		// Screen leave
 		//		kMsgCLeave 			= "COUT"
+		printf("COUT\n");
 		context->m_isCaptured = USYNERGY_FALSE;
 
 		// Call callback
@@ -289,6 +294,7 @@ static void sProcessMessage(uSynergyContext *context, const uint8_t *message)
 	{
 		// Mouse down
 		//		kMsgDMouseDown		= "DMDN%1i"
+		printf("DMDN\n");
 		char btn = message[8]-1;
 		if (btn==2)
 			context->m_mouseButtonRight		= USYNERGY_TRUE;
@@ -302,6 +308,7 @@ static void sProcessMessage(uSynergyContext *context, const uint8_t *message)
 	{
 		// Mouse up
 		//		kMsgDMouseUp		= "DMUP%1i"
+		printf("DMUP\n");
 		char btn = message[8]-1;
 		if (btn==2)
 			context->m_mouseButtonRight		= USYNERGY_FALSE;
@@ -315,6 +322,7 @@ static void sProcessMessage(uSynergyContext *context, const uint8_t *message)
 	{
 		// Mouse move. Reply with CNOP
 		//		kMsgDMouseMove		= "DMMV%2i%2i"
+		printf("DMMV\n");
 		context->m_mouseX = sNetToNative16(message+8);
 		context->m_mouseY = sNetToNative16(message+10);
 		sSendMouseCallback(context);
@@ -324,6 +332,7 @@ static void sProcessMessage(uSynergyContext *context, const uint8_t *message)
 		// Mouse wheel
 		//		kMsgDMouseWheel		= "DMWM%2i%2i"
 		//		kMsgDMouseWheel1_0	= "DMWM%2i"
+		printf("DMWM\n");
 		context->m_mouseWheelX += sNetToNative16(message+8);
 		context->m_mouseWheelY += sNetToNative16(message+10);
 		sSendMouseCallback(context);
@@ -334,6 +343,7 @@ static void sProcessMessage(uSynergyContext *context, const uint8_t *message)
 		//		kMsgDKeyDown		= "DKDN%2i%2i%2i"
 		//		kMsgDKeyDown1_0		= "DKDN%2i%2i"
 		//uint16_t id = sNetToNative16(message+8);
+		printf("DKDN\n");
 		uint16_t mod = sNetToNative16(message+10);
 		uint16_t key = sNetToNative16(message+12);
 		sSendKeyboardCallback(context, key, mod, USYNERGY_TRUE, USYNERGY_FALSE);
@@ -343,6 +353,7 @@ static void sProcessMessage(uSynergyContext *context, const uint8_t *message)
 		// Key repeat
 		//		kMsgDKeyRepeat		= "DKRP%2i%2i%2i%2i"
 		//		kMsgDKeyRepeat1_0	= "DKRP%2i%2i%2i"
+		printf("DKRP\n");
 		uint16_t mod = sNetToNative16(message+10);
 //		uint16_t count = sNetToNative16(message+12);
 		uint16_t key = sNetToNative16(message+14);
@@ -354,6 +365,7 @@ static void sProcessMessage(uSynergyContext *context, const uint8_t *message)
 		//		kMsgDKeyUp			= "DKUP%2i%2i%2i"
 		//		kMsgDKeyUp1_0		= "DKUP%2i%2i"
 		//uint16 id=Endian::sNetToNative(sbuf[4]);
+		printf("DKUP\n");
 		uint16_t mod = sNetToNative16(message+10);
 		uint16_t key = sNetToNative16(message+12);
 		sSendKeyboardCallback(context, key, mod, USYNERGY_FALSE, USYNERGY_FALSE);
@@ -362,6 +374,7 @@ static void sProcessMessage(uSynergyContext *context, const uint8_t *message)
 	{
 		// Joystick buttons
 		//		kMsgDGameButtons	= "DGBT%1i%2i";
+		printf("DGBT\n");
 		uint8_t	joy_num = message[8];
 		if (joy_num<USYNERGY_NUM_JOYSTICKS)
 		{
@@ -374,6 +387,7 @@ static void sProcessMessage(uSynergyContext *context, const uint8_t *message)
 	{
 		// Joystick sticks
 		//		kMsgDGameSticks		= "DGST%1i%1i%1i%1i%1i";
+		printf("DGST\n");
 		uint8_t	joy_num = message[8];
 		if (joy_num<USYNERGY_NUM_JOYSTICKS)
 		{
@@ -386,11 +400,13 @@ static void sProcessMessage(uSynergyContext *context, const uint8_t *message)
 	{
 		// Set options
 		//		kMsgDSetOptions		= "DSOP%4I"
+		printf("DSOP\n");
 	}
 	else if (USYNERGY_IS_PACKET("CALV"))
 	{
 		// Keepalive, reply with CALV and then CNOP
 		//		kMsgCKeepAlive		= "CALV"
+		printf("DALV\n");
 		sAddString(context, "CALV");
 		sSendReply(context);
 		// now reply with CNOP
@@ -411,6 +427,7 @@ static void sProcessMessage(uSynergyContext *context, const uint8_t *message)
 		//		1 uint32:	The format of the clipboard data
 		//		1 uint32:	The size n of the clipboard data
 		//		n uint8:	The clipboard data
+		printf("DCLP\n");
 		const uint8_t *	parse_msg	= message+17;
 		uint32_t		num_formats = sNetToNative32(parse_msg);
 		parse_msg += 4;
@@ -442,19 +459,32 @@ static void sProcessMessage(uSynergyContext *context, const uint8_t *message)
 		//		kMsgEBusy 			= "EBSY"
 		//		kMsgEUnknown		= "EUNK"
 		//		kMsgEBad			= "EBAD"
+		printf("Unknow\n");
 		char buffer[64];
 		sprintf(buffer, "Unknown packet '%c%c%c%c'", message[4], message[5], message[6], message[7]);
 		sTrace(context, buffer);
+		printf("out process\n");
 		return;
 	}
 
 	// Reply with CNOP maybe?
+	printf("CNOP\n");
 	sAddString(context, "CNOP");
 	sSendReply(context);
 }
 #undef USYNERGY_IS_PACKET
 
 
+static sSetMachineState(uSynergyContext *context)
+{
+	context->m_clientName		= "Android";
+	context->m_clientWidth		= 1070;
+	context->m_clientHeight		= 600;
+	context->m_connectFunc		= uSynergyConnectFunc;
+	context->m_receiveFunc		= uSynergyReceiveFunc;
+	context->m_sendFunc			= uSynergySendFunc;
+	context->m_getTimeFunc		= uSynergyGetTimeFunc;
+}
 
 /**
 @brief Mark context as being disconnected
@@ -489,6 +519,7 @@ static void sUpdateContext(uSynergyContext *context)
 		context->m_sleepFunc(context->m_cookie, 1000);
 		return;
 	}
+
 	context->m_receiveOfs += num_received;
 
 	/*	If we didn't receive any data then we're probably still polling to get connected and
@@ -521,7 +552,6 @@ static void sUpdateContext(uSynergyContext *context)
 
 		/* Process message */
 		sProcessMessage(context, context->m_receiveBuffer);
-
 		/* Move packet to front of buffer */
 		memmove(context->m_receiveBuffer, context->m_receiveBuffer+packlen+4, context->m_receiveOfs-packlen-4);
 		context->m_receiveOfs -= packlen+4;
@@ -572,7 +602,13 @@ void uSynergyInit(uSynergyContext *context)
 	/* Zero memory */
 	memset(context, 0, sizeof(uSynergyContext));
 
+	uSynergyCookie cookie;
+	cookie = malloc(sizeof(uSynergyCookie));
+	memset(cookie, 0, sizeof(uSynergyCookie));
+	context->m_cookie = cookie;
+
 	/* Initialize to default state */
+	sSetMachineState(context);
 	sSetDisconnected(context);
 }
 
@@ -633,4 +669,98 @@ void uSynergySendClipboard(uSynergyContext *context, const char *text)
 	sAddUInt32(context, text_length);
 	sAddString(context, text);
 	sSendReply(context);
+}
+
+/**
+@brief Connect function
+
+This function is called when uSynergy needs to connect to the host. It doesn't imply a network implementation or
+destination address, that must all be handled on the user side. The function should return USYNERGY_TRUE if a
+connection was established or USYNERGY_FALSE if it could not connect.
+
+When network errors occur (e.g. uSynergySend or uSynergyReceive fail) then the connect call will be called again
+so the implementation of the function must close any old connections and clean up resources before retrying.
+
+@param cookie		Cookie supplied in the Synergy context
+**/
+uSynergyBool uSynergyConnectFunc(uSynergyCookie cookie)
+{
+	memset(&(cookie->server_addr), 0, sizeof(struct sockaddr));
+	cookie->server_addr.sin_family = AF_INET;
+	cookie->server_addr.sin_port = htons(24800);
+	cookie->server_addr.sin_addr.s_addr = inet_addr("10.11.71.151");
+
+	cookie->sockfd = socket(AF_INET, SOCK_STREAM, 0);
+	socklen_t addr_len;
+
+	if (connect(cookie->sockfd, (struct sockaddr *)& cookie->server_addr, sizeof(struct sockaddr)) == 0)
+		return USYNERGY_TRUE;
+	else {
+		perror("connect error.");
+		return USYNERGY_FALSE;
+	}
+}
+
+/**
+@brief Receive function
+
+This function is called when uSynergy needs to receive data from the default connection. It should return
+USYNERGY_TRUE if receiving data succeeded and USYNERGY_FALSE otherwise. This function should block until data
+has been received and wait for data to become available. If @a outLength is set to 0 upon completion it is
+assumed that the connection is alive, but still in a connecting state and needs time to settle.
+
+@param cookie		Cookie supplied in the Synergy context
+@param buffer		Address of buffer to receive data into
+@param maxLength	Maximum amount of bytes to write into the receive buffer
+@param outLength	Address of integer that receives the actual amount of bytes written into @a buffer
+**/
+uSynergyBool uSynergyReceiveFunc(uSynergyCookie cookie, uint8_t *buffer, int maxLength, int* outLength)
+{
+	int ret;
+	ret = recv(cookie->sockfd, buffer, maxLength, 0);
+	if (ret <= 0)
+		return USYNERGY_FALSE;
+
+	*outLength = ret;
+	return USYNERGY_TRUE;
+}
+
+/**
+@brief Send function
+
+This function is called when uSynergy needs to send something over the default connection. It should return
+USYNERGY_TRUE if sending succeeded and USYNERGY_FALSE otherwise. This function should block until the send
+operation is completed.
+
+@param cookie       Cookie supplied in the Synergy context
+@param buffer       Address of buffer to send
+@param length       Length of buffer to send
+**/
+uSynergyBool uSynergySendFunc(uSynergyCookie cookie, const uint8_t *buffer, int length)
+{
+	int ret;
+	ret = send(cookie->sockfd, buffer, length, 0);
+	if (ret < 0 || ret != length)
+		return USYNERGY_FALSE;
+
+	return USYNERGY_TRUE;
+}
+
+
+/**
+@brief Get time function
+
+This function is called when uSynergy needs to know the current time. This is used to determine when timeouts
+have occured. The time base should be a cyclic millisecond time value.
+
+@returns            Time value in milliseconds
+**/
+uint32_t uSynergyGetTimeFunc()
+{
+	uint32_t ret = 0;
+	time_t now;
+
+	ret = time(&now);
+
+	return ret*1000;
 }
