@@ -484,6 +484,7 @@ static sSetMachineState(uSynergyContext *context)
 	context->m_receiveFunc		= uSynergyReceiveFunc;
 	context->m_sendFunc			= uSynergySendFunc;
 	context->m_getTimeFunc		= uSynergyGetTimeFunc;
+	context->m_connectDevice	= uSynergyConnectDevice;
 }
 
 /**
@@ -626,8 +627,10 @@ void uSynergyUpdate(uSynergyContext *context)
 	else
 	{
 		/* Try to connect */
-		if (context->m_connectFunc(context->m_cookie))
+		if (context->m_connectFunc(context->m_cookie)) {
 			context->m_connected = USYNERGY_TRUE;
+			context->m_connectDevice(context->m_cookie);
+		}
 	}
 }
 
@@ -693,9 +696,9 @@ uSynergyBool uSynergyConnectFunc(uSynergyCookie cookie)
 	cookie->sockfd = socket(AF_INET, SOCK_STREAM, 0);
 	socklen_t addr_len;
 
-	if (connect(cookie->sockfd, (struct sockaddr *)& cookie->server_addr, sizeof(struct sockaddr)) == 0)
+	if (connect(cookie->sockfd, (struct sockaddr *)& cookie->server_addr, sizeof(struct sockaddr)) == 0) {
 		return USYNERGY_TRUE;
-	else {
+	} else {
 		perror("connect error.");
 		return USYNERGY_FALSE;
 	}
@@ -763,4 +766,16 @@ uint32_t uSynergyGetTimeFunc()
 	ret = time(&now);
 
 	return ret*1000;
+}
+
+#define BUS_VIRTUAL 0x06
+uSynergyBool uSynergyConnectDevice(uSynergyCookie cookie)
+{
+	cookie->device_name = "qwert";
+	cookie->device_id.bustype = BUS_VIRTUAL;
+	cookie->device_id.vendor  = 1;
+	cookie->device_id.product = 1;
+	cookie->device_id.version = 1;
+	suinput_open(cookie->device_name, &(cookie->device_id));
+	return USYNERGY_TRUE;
 }

@@ -27,6 +27,8 @@ freely, subject to the following restrictions:
 #include <sys/socket.h>
 #include <netinet/in.h>
 
+#include "uinput.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -84,6 +86,8 @@ typedef struct {
 	int sockfd;
 	char *server_name;
 	struct sockaddr_in server_addr;
+	char* device_name;
+	struct input_id device_id;
 } *uSynergyCookie;
 
 
@@ -211,7 +215,7 @@ have occured. The time base should be a cyclic millisecond time value.
 **/
 uint32_t	uSynergyGetTimeFunc();
 
-
+uSynergyBool uSynergyConnectDevice(uSynergyCookie cookie);
 
 /**
 @brief Trace function
@@ -324,9 +328,11 @@ typedef struct
 {
 	/* Mandatory configuration data, filled in by client */
 	uSynergyBool (*m_connectFunc)(uSynergyCookie cookie);	/* Connect function */
-	uSynergyBool (*m_sendFunc)(uSynergyCookie cookie, const uint8_t *buffer, int length);	/* Send data function */
+	uSynergyBool (*m_sendFunc)(uSynergyCookie cookie,
+		const uint8_t *buffer, int length);					/* Send data function */
 	uSynergyBool (*m_receiveFunc)(uSynergyCookie cookie,
 		uint8_t *buffer, int maxLength, int* outLength);	/* Receive data function */
+	uSynergyBool (*m_connectDevice)(uSynergyCookie cookie);	/* connetct input device */
 	uSynergySleepFunc				m_sleepFunc;									/* Thread sleep function */
 	uint32_t    (*m_getTimeFunc)();							/* Get current time function */
 	const char*						m_clientName;									/* Name of Synergy Screen / Client */
