@@ -279,7 +279,7 @@ This callback is called when a key is pressed or released.
 @param down			Down or up status, 1 is key is pressed down, 0 if key is released (up)
 @param repeat		Repeat flag, 1 if the key is down because the key is repeating, 0 if the key is initially pressed by the user
 **/
-typedef void		(*uSynergyKeyboardCallback)(uSynergyCookie cookie, uint16_t key, uint16_t modifiers, uSynergyBool down, uSynergyBool repeat);
+void uSynergyKeyboardCallback(uSynergyCookie cookie, uint16_t key, uint16_t modifiers, uSynergyBool down, uSynergyBool repeat);
 
 
 
@@ -355,7 +355,8 @@ typedef struct
 	uSynergyBool (*m_mouseDownCallback)(uSynergyCookie cookie, uSynergyBool buttonLeft,
 		uSynergyBool buttonRight, uSynergyBool buttonMiddle);
 	uSynergyBool (*m_mouseWheelCallback)(uSynergyCookie cookie, int16_t wheelX, int16_t wheelY);
-	uSynergyKeyboardCallback		m_keyboardCallback;								/* Callback for keyboard events */
+	void (*m_keyboardCallback)(uSynergyCookie cookie, uint16_t key,
+		uint16_t modifiers, uSynergyBool down, uSynergyBool repeat); /* Callback for keyboard events */
 	uSynergyJoystickCallback		m_joystickCallback;								/* Callback for joystick events */
 	uSynergyClipboardCallback		m_clipboardCallback;							/* Callback for clipboard events */
 

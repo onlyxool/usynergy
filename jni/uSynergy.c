@@ -504,6 +504,7 @@ static sSetMachineState(uSynergyContext *context)
 	context->m_mouseUpCallback	= uSynergyMouseUpCallback;
 	context->m_mouseDownCallback= uSynergyMouseDownCallback;
 	context->m_mouseWheelCallback	= uSynergyMouseWheelCallback;
+	context->m_keyboardCallback	= uSynergyKeyboardCallback;
 }
 
 /**
@@ -797,7 +798,7 @@ uSynergyBool uSynergyConnectDevice(uSynergyCookie cookie, int clientWidth, int c
 	device_id.vendor  = 1;
 	device_id.product = 1;
 	device_id.version = 0x0100;
-	//cookie->uinput_keyboard = suinput_open("qwerty", &(cookie->device_id), keyboard);
+	cookie->uinput_keyboard = suinput_open("qwerty", &(cookie->device_id), keyboard);
 	cookie->uinput_mouse = suinput_open("synergy-mouse", &(cookie->device_id), mouse);
 	return USYNERGY_TRUE;
 }
@@ -874,4 +875,24 @@ uSynergyBool uSynergyMouseDownCallback(uSynergyCookie cookie, uSynergyBool butto
 uSynergyBool uSynergyMouseWheelCallback(uSynergyCookie cookie, int16_t wheelX, int16_t wheelY)
 {
 	return USYNERGY_TRUE;
+}
+
+/**
+@brief Key event callback
+
+This callback is called when a key is pressed or released.
+
+@param cookie       Cookie supplied in the Synergy context
+@param key          Key code of key that was pressed or released
+@param modifiers    Status of modifier keys (alt, shift, etc.)
+@param down         Down or up status, 1 is key is pressed down, 0 if key is released (up)
+@param repeat       Repeat flag, 1 if the key is down because the key is repeating, 0 if the key is initially pressed by the user
+**/
+void uSynergyKeyboardCallback(uSynergyCookie cookie, uint16_t key, uint16_t modifiers, uSynergyBool down, uSynergyBool repeat)
+{
+	int ret;
+	if (down)
+		ret = suinput_press(cookie->uinput_keyboard, key);
+	else
+		ret = suinput_release(cookie->uinput_keyboard, key);
 }
