@@ -23,12 +23,17 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include <linux/input.h>
 
+typedef enum {
+	mouse,
+	keyboard,
+	joystick
+} device_type;
 /*
   Creates and opens a connection to the event device. Returns an uinput file
   descriptor on success. On error, -1 is returned, and errno is set
   appropriately.
 */
-int suinput_open(const char* device_name, const struct input_id* id);
+int suinput_open(const char* device_name, const struct input_id* id, device_type type);
 
 /* 
   Destroys and closes a connection to the event device. Returns 0 on success.

@@ -75,7 +75,6 @@ typedef int			uSynergyBool;
 #define				USYNERGY_FALSE					0				/* False value */
 #define				USYNERGY_TRUE					1				/* True value */
 
-
 /**
 @brief User context type
 
@@ -88,6 +87,9 @@ typedef struct {
 	struct sockaddr_in server_addr;
 	char* device_name;
 	struct input_id device_id;
+	int uinput_keyboard;
+	int uinput_mouse;
+	int uinput_joystick;
 } *uSynergyCookie;
 
 
@@ -215,7 +217,7 @@ have occured. The time base should be a cyclic millisecond time value.
 **/
 uint32_t	uSynergyGetTimeFunc();
 
-uSynergyBool uSynergyConnectDevice(uSynergyCookie cookie);
+uSynergyBool uSynergyConnectDevice(uSynergyCookie cookie, int clientWidth, int clientHeight);
 
 /**
 @brief Trace function
@@ -240,7 +242,7 @@ callback is usually sent when the mouse enters or leaves the screen.
 @param cookie		Cookie supplied in the Synergy context
 @param active		Activation flag, 1 if the screen has become active, 0 if the screen has become inactive
 **/
-typedef void		(*uSynergyScreenActiveCallback)(uSynergyCookie cookie, uSynergyBool active);
+void uSynergyScreenActiveCallback(uSynergyCookie cookie, uSynergyBool active);
 
 
 
@@ -260,8 +262,10 @@ interpret if this is a mouse up, down, double-click or other message.
 @param buttonMiddle	Middle button pressed status, 0 for released, 1 for pressed
 @param buttonRight	Right button pressed status, 0 for released, 1 for pressed
 **/
-typedef void		(*uSynergyMouseCallback)(uSynergyCookie cookie, uint16_t x, uint16_t y, int16_t wheelX, int16_t wheelY, uSynergyBool buttonLeft, uSynergyBool buttonRight, uSynergyBool buttonMiddle);
-
+uSynergyBool uSynergyMouseMoveCallback(uSynergyCookie cookie, int32_t x, int32_t y);
+uSynergyBool uSynergyMouseUpCallback(uSynergyCookie cookie, uSynergyBool buttonLeft, uSynergyBool buttonRight, uSynergyBool buttonMiddle);
+uSynergyBool uSynergyMouseDownCallback(uSynergyCookie cookie, uSynergyBool buttonLeft, uSynergyBool buttonRight, uSynergyBool buttonMiddle);
+uSynergyBool uSynergyMouseWheelCallback(uSynergyCookie cookie, int16_t wheelX, int16_t wheelY);
 
 
 /**
@@ -332,7 +336,7 @@ typedef struct
 		const uint8_t *buffer, int length);					/* Send data function */
 	uSynergyBool (*m_receiveFunc)(uSynergyCookie cookie,
 		uint8_t *buffer, int maxLength, int* outLength);	/* Receive data function */
-	uSynergyBool (*m_connectDevice)(uSynergyCookie cookie);	/* connetct input device */
+	uSynergyBool (*m_connectDevice)(uSynergyCookie cookie, int clientWidth, int clientHeight);	/* connetct input device */
 	uSynergySleepFunc				m_sleepFunc;									/* Thread sleep function */
 	uint32_t    (*m_getTimeFunc)();							/* Get current time function */
 	const char*						m_clientName;									/* Name of Synergy Screen / Client */
@@ -342,8 +346,15 @@ typedef struct
 	/* Optional configuration data, filled in by client */
 	uSynergyCookie					m_cookie;										/* Cookie pointer passed to callback functions (can be NULL) */
 	uSynergyTraceFunc				m_traceFunc;									/* Function for tracing status (can be NULL) */
-	uSynergyScreenActiveCallback	m_screenActiveCallback;							/* Callback for entering and leaving screen */
-	uSynergyMouseCallback			m_mouseCallback;								/* Callback for mouse events */
+	void (*m_screenActiveCallback)(uSynergyCookie cookie,
+		uSynergyBool active);								/* Callback for entering and leaving screen */
+	uSynergyBool (*m_mouseMoveCallback)(uSynergyCookie cookie, int32_t x,
+		int32_t y);/* Callback for mouse events */
+	uSynergyBool (*m_mouseUpCallback)(uSynergyCookie cookie, uSynergyBool buttonLeft,
+		uSynergyBool buttonRight, uSynergyBool buttonMiddle);
+	uSynergyBool (*m_mouseDownCallback)(uSynergyCookie cookie, uSynergyBool buttonLeft,
+		uSynergyBool buttonRight, uSynergyBool buttonMiddle);
+	uSynergyBool (*m_mouseWheelCallback)(uSynergyCookie cookie, int16_t wheelX, int16_t wheelY);
 	uSynergyKeyboardCallback		m_keyboardCallback;								/* Callback for keyboard events */
 	uSynergyJoystickCallback		m_joystickCallback;								/* Callback for joystick events */
 	uSynergyClipboardCallback		m_clipboardCallback;							/* Callback for clipboard events */
@@ -358,6 +369,8 @@ typedef struct
 	int								m_receiveOfs;									/* Receive buffer offset */
 	uint8_t							m_replyBuffer[USYNERGY_REPLY_BUFFER_SIZE];		/* Reply buffer */
 	uint8_t*						m_replyCur;										/* Write offset into reply buffer */
+	uint16_t						m_mouseX_old;
+	uint16_t						m_mouseY_old;
 	uint16_t						m_mouseX;										/* Mouse X position */
 	uint16_t						m_mouseY;										/* Mouse Y position */
 	int16_t							m_mouseWheelX;									/* Mouse wheel X position */

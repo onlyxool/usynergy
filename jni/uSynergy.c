@@ -24,6 +24,7 @@ freely, subject to the following restrictions:
    distribution.
 */
 #include "uSynergy.h"
+#include "suinput.h"
 #include <stdio.h>
 #include <string.h>
 
@@ -153,18 +154,47 @@ static uSynergyBool sSendReply(uSynergyContext *context)
 /**
 @brief Call mouse callback after a mouse event
 **/
-static void sSendMouseCallback(uSynergyContext *context)
+static void sSendMouseMoveCallback(uSynergyContext *context)
 {
 	// Skip if no callback is installed
-	if (context->m_mouseCallback == 0L)
+	if (context->m_mouseMoveCallback == 0L)
 		return;
 
 	// Send callback
-	context->m_mouseCallback(context->m_cookie, context->m_mouseX, context->m_mouseY, context->m_mouseWheelX,
-		context->m_mouseWheelY, context->m_mouseButtonLeft, context->m_mouseButtonRight, context->m_mouseButtonMiddle);
+	uSynergyBool ret;
+	int32_t rel_x = context->m_mouseX - context->m_mouseX_old;
+	int32_t rel_y = context->m_mouseY - context->m_mouseY_old;
+	ret = context->m_mouseMoveCallback(context->m_cookie, rel_x, rel_y);
+
+	if (ret == USYNERGY_TRUE) {
+		context->m_mouseX_old = context->m_mouseX;
+		context->m_mouseY_old = context->m_mouseY;
+	}
 }
 
+static void sSendMouseUpCallback(uSynergyContext *context)
+{
+	if (context->m_mouseUpCallback == 0L)
+		return;
+	uSynergyBool ret;
+	ret = context->m_mouseUpCallback(context->m_cookie, context->m_mouseButtonLeft, context->m_mouseButtonRight, context->m_mouseButtonMiddle);
+}
 
+static void sSendMouseDownCallback(uSynergyContext *context)
+{
+	if (context->m_mouseDownCallback == 0L)
+		return;
+	uSynergyBool ret;
+	ret = context->m_mouseDownCallback(context->m_cookie, context->m_mouseButtonLeft, context->m_mouseButtonRight, context->m_mouseButtonMiddle);
+}
+
+static void sSendMouseWheelCallback(uSynergyContext *context)
+{
+	if (context->m_mouseWheelCallback == 0L)
+		return;
+	uSynergyBool ret;
+	ret = context->m_mouseWheelCallback(context->m_cookie, context->m_mouseWheelX, context->m_mouseWheelY);
+}
 
 /**
 @brief Send keyboard callback when a key has been pressed or released
@@ -238,7 +268,6 @@ static void sProcessMessage(uSynergyContext *context, const uint8_t *message)
 		// Screen info. Reply with DINF
 		//		kMsgQInfo			= "QINF"
 		//		kMsgDInfo			= "DINF%2i%2i%2i%2i%2i%2i%2i"
-		printf("QINF\n");
 		uint16_t x = 0, y = 0, warp = 0;
 		sAddString(context, "DINF");
 		sAddUInt16(context, x);
@@ -255,14 +284,12 @@ static void sProcessMessage(uSynergyContext *context, const uint8_t *message)
 	{
 		// Do nothing?
 		//		kMsgCInfoAck		= "CIAK"
-		printf("CIAK\n");
 		return;
 	}
 	else if (USYNERGY_IS_PACKET("CROP"))
 	{
 		// Do nothing?
 		//		kMsgCResetOptions	= "CROP"
-		printf("CROP\n");
 		return;
 	}
 	else if (USYNERGY_IS_PACKET("CINN"))
@@ -271,19 +298,20 @@ static void sProcessMessage(uSynergyContext *context, const uint8_t *message)
 		//		kMsgCEnter 			= "CINN%2i%2i%4i%2i"
 
 		// Obtain the Synergy sequence number
-		printf("CINN\n");
 		context->m_sequenceNumber = sNetToNative32(message + 12);
 		context->m_isCaptured = USYNERGY_TRUE;
 
 		// Call callback
-		if (context->m_screenActiveCallback != 0L)
+		if (context->m_screenActiveCallback != 0L) {
+			context->m_mouseX_old = context->m_clientWidth / 2;
+			context->m_mouseY_old = context->m_clientHeight / 2;
 			context->m_screenActiveCallback(context->m_cookie, USYNERGY_TRUE);
+		}
 	}
 	else if (USYNERGY_IS_PACKET("COUT"))
 	{
 		// Screen leave
 		//		kMsgCLeave 			= "COUT"
-		printf("COUT\n");
 		context->m_isCaptured = USYNERGY_FALSE;
 
 		// Call callback
@@ -294,7 +322,6 @@ static void sProcessMessage(uSynergyContext *context, const uint8_t *message)
 	{
 		// Mouse down
 		//		kMsgDMouseDown		= "DMDN%1i"
-		printf("DMDN\n");
 		char btn = message[8]-1;
 		if (btn==2)
 			context->m_mouseButtonRight		= USYNERGY_TRUE;
@@ -302,13 +329,12 @@ static void sProcessMessage(uSynergyContext *context, const uint8_t *message)
 			context->m_mouseButtonMiddle	= USYNERGY_TRUE;
 		else
 			context->m_mouseButtonLeft		= USYNERGY_TRUE;
-		sSendMouseCallback(context);
+		sSendMouseDownCallback(context);
 	}
 	else if (USYNERGY_IS_PACKET("DMUP"))
 	{
 		// Mouse up
 		//		kMsgDMouseUp		= "DMUP%1i"
-		printf("DMUP\n");
 		char btn = message[8]-1;
 		if (btn==2)
 			context->m_mouseButtonRight		= USYNERGY_FALSE;
@@ -316,26 +342,24 @@ static void sProcessMessage(uSynergyContext *context, const uint8_t *message)
 			context->m_mouseButtonMiddle	= USYNERGY_FALSE;
 		else
 			context->m_mouseButtonLeft		= USYNERGY_FALSE;
-		sSendMouseCallback(context);
+		sSendMouseUpCallback(context);
 	}
 	else if (USYNERGY_IS_PACKET("DMMV"))
 	{
 		// Mouse move. Reply with CNOP
 		//		kMsgDMouseMove		= "DMMV%2i%2i"
-		printf("DMMV\n");
 		context->m_mouseX = sNetToNative16(message+8);
 		context->m_mouseY = sNetToNative16(message+10);
-		sSendMouseCallback(context);
+		sSendMouseMoveCallback(context);
 	}
 	else if (USYNERGY_IS_PACKET("DMWM"))
 	{
 		// Mouse wheel
 		//		kMsgDMouseWheel		= "DMWM%2i%2i"
 		//		kMsgDMouseWheel1_0	= "DMWM%2i"
-		printf("DMWM\n");
 		context->m_mouseWheelX += sNetToNative16(message+8);
 		context->m_mouseWheelY += sNetToNative16(message+10);
-		sSendMouseCallback(context);
+		sSendMouseWheelCallback(context);
 	}
 	else if (USYNERGY_IS_PACKET("DKDN"))
 	{
@@ -343,7 +367,6 @@ static void sProcessMessage(uSynergyContext *context, const uint8_t *message)
 		//		kMsgDKeyDown		= "DKDN%2i%2i%2i"
 		//		kMsgDKeyDown1_0		= "DKDN%2i%2i"
 		//uint16_t id = sNetToNative16(message+8);
-		printf("DKDN\n");
 		uint16_t mod = sNetToNative16(message+10);
 		uint16_t key = sNetToNative16(message+12);
 		sSendKeyboardCallback(context, key, mod, USYNERGY_TRUE, USYNERGY_FALSE);
@@ -353,7 +376,6 @@ static void sProcessMessage(uSynergyContext *context, const uint8_t *message)
 		// Key repeat
 		//		kMsgDKeyRepeat		= "DKRP%2i%2i%2i%2i"
 		//		kMsgDKeyRepeat1_0	= "DKRP%2i%2i%2i"
-		printf("DKRP\n");
 		uint16_t mod = sNetToNative16(message+10);
 //		uint16_t count = sNetToNative16(message+12);
 		uint16_t key = sNetToNative16(message+14);
@@ -365,7 +387,6 @@ static void sProcessMessage(uSynergyContext *context, const uint8_t *message)
 		//		kMsgDKeyUp			= "DKUP%2i%2i%2i"
 		//		kMsgDKeyUp1_0		= "DKUP%2i%2i"
 		//uint16 id=Endian::sNetToNative(sbuf[4]);
-		printf("DKUP\n");
 		uint16_t mod = sNetToNative16(message+10);
 		uint16_t key = sNetToNative16(message+12);
 		sSendKeyboardCallback(context, key, mod, USYNERGY_FALSE, USYNERGY_FALSE);
@@ -374,7 +395,6 @@ static void sProcessMessage(uSynergyContext *context, const uint8_t *message)
 	{
 		// Joystick buttons
 		//		kMsgDGameButtons	= "DGBT%1i%2i";
-		printf("DGBT\n");
 		uint8_t	joy_num = message[8];
 		if (joy_num<USYNERGY_NUM_JOYSTICKS)
 		{
@@ -387,7 +407,6 @@ static void sProcessMessage(uSynergyContext *context, const uint8_t *message)
 	{
 		// Joystick sticks
 		//		kMsgDGameSticks		= "DGST%1i%1i%1i%1i%1i";
-		printf("DGST\n");
 		uint8_t	joy_num = message[8];
 		if (joy_num<USYNERGY_NUM_JOYSTICKS)
 		{
@@ -400,13 +419,11 @@ static void sProcessMessage(uSynergyContext *context, const uint8_t *message)
 	{
 		// Set options
 		//		kMsgDSetOptions		= "DSOP%4I"
-		printf("DSOP\n");
 	}
 	else if (USYNERGY_IS_PACKET("CALV"))
 	{
 		// Keepalive, reply with CALV and then CNOP
 		//		kMsgCKeepAlive		= "CALV"
-		printf("DALV\n");
 		sAddString(context, "CALV");
 		sSendReply(context);
 		// now reply with CNOP
@@ -427,7 +444,6 @@ static void sProcessMessage(uSynergyContext *context, const uint8_t *message)
 		//		1 uint32:	The format of the clipboard data
 		//		1 uint32:	The size n of the clipboard data
 		//		n uint8:	The clipboard data
-		printf("DCLP\n");
 		const uint8_t *	parse_msg	= message+17;
 		uint32_t		num_formats = sNetToNative32(parse_msg);
 		parse_msg += 4;
@@ -459,16 +475,14 @@ static void sProcessMessage(uSynergyContext *context, const uint8_t *message)
 		//		kMsgEBusy 			= "EBSY"
 		//		kMsgEUnknown		= "EUNK"
 		//		kMsgEBad			= "EBAD"
-		printf("Unknow\n");
 		char buffer[64];
 		sprintf(buffer, "Unknown packet '%c%c%c%c'", message[4], message[5], message[6], message[7]);
+		printf("Unknown packet '%c%c%c%c'\n", message[4], message[5], message[6], message[7]);
 		sTrace(context, buffer);
-		printf("out process\n");
 		return;
 	}
 
 	// Reply with CNOP maybe?
-	printf("CNOP\n");
 	sAddString(context, "CNOP");
 	sSendReply(context);
 }
@@ -485,6 +499,11 @@ static sSetMachineState(uSynergyContext *context)
 	context->m_sendFunc			= uSynergySendFunc;
 	context->m_getTimeFunc		= uSynergyGetTimeFunc;
 	context->m_connectDevice	= uSynergyConnectDevice;
+	context->m_screenActiveCallback = uSynergyScreenActiveCallback;
+	context->m_mouseMoveCallback	= uSynergyMouseMoveCallback;
+	context->m_mouseUpCallback	= uSynergyMouseUpCallback;
+	context->m_mouseDownCallback= uSynergyMouseDownCallback;
+	context->m_mouseWheelCallback	= uSynergyMouseWheelCallback;
 }
 
 /**
@@ -497,6 +516,7 @@ static void sSetDisconnected(uSynergyContext *context)
 	context->m_isCaptured		= USYNERGY_FALSE;
 	context->m_replyCur			= context->m_replyBuffer + 4;
 	context->m_sequenceNumber	= 0;
+	suinput_close(context->m_cookie->uinput_mouse);
 }
 
 
@@ -510,7 +530,7 @@ static void sUpdateContext(uSynergyContext *context)
 	int receive_size = USYNERGY_RECEIVE_BUFFER_SIZE - context->m_receiveOfs;
 	int num_received = 0;
 	int packlen = 0;
-	if (context->m_receiveFunc(context->m_cookie, context->m_receiveBuffer, receive_size, &num_received) == USYNERGY_FALSE)
+	if (context->m_receiveFunc(context->m_cookie, context->m_receiveBuffer+context->m_receiveOfs, receive_size, &num_received) == USYNERGY_FALSE)
 	{
 		/* Receive failed, let's try to reconnect */
 		char buffer[128];
@@ -550,7 +570,6 @@ static void sUpdateContext(uSynergyContext *context)
 		packlen = sNetToNative32(context->m_receiveBuffer);
 		if (packlen+4 > context->m_receiveOfs)
 			break;
-
 		/* Process message */
 		sProcessMessage(context, context->m_receiveBuffer);
 		/* Move packet to front of buffer */
@@ -564,6 +583,7 @@ static void sUpdateContext(uSynergyContext *context)
 		/* Oversized packet, ditch tail end */
 		char buffer[128];
 		sprintf(buffer, "Oversized packet: '%c%c%c%c' (length %d)", context->m_receiveBuffer[4], context->m_receiveBuffer[5], context->m_receiveBuffer[6], context->m_receiveBuffer[7], packlen);
+		printf("Oversized packet: '%c%c%c%c' (length %d)\n", context->m_receiveBuffer[4], context->m_receiveBuffer[5], context->m_receiveBuffer[6], context->m_receiveBuffer[7], packlen);
 		sTrace(context, buffer);
 		num_received = context->m_receiveOfs-4; // 4 bytes for the size field
 		while (num_received != packlen)
@@ -629,7 +649,7 @@ void uSynergyUpdate(uSynergyContext *context)
 		/* Try to connect */
 		if (context->m_connectFunc(context->m_cookie)) {
 			context->m_connected = USYNERGY_TRUE;
-			context->m_connectDevice(context->m_cookie);
+			context->m_connectDevice(context->m_cookie, context->m_clientWidth, context->m_clientHeight);
 		}
 	}
 }
@@ -691,7 +711,8 @@ uSynergyBool uSynergyConnectFunc(uSynergyCookie cookie)
 	memset(&(cookie->server_addr), 0, sizeof(struct sockaddr));
 	cookie->server_addr.sin_family = AF_INET;
 	cookie->server_addr.sin_port = htons(24800);
-	cookie->server_addr.sin_addr.s_addr = inet_addr("10.11.71.151");
+	cookie->server_addr.sin_addr.s_addr = inet_addr("10.11.71.114");
+	//cookie->server_addr.sin_addr.s_addr = inet_addr("192.168.0.105");
 
 	cookie->sockfd = socket(AF_INET, SOCK_STREAM, 0);
 	socklen_t addr_len;
@@ -769,13 +790,88 @@ uint32_t uSynergyGetTimeFunc()
 }
 
 #define BUS_VIRTUAL 0x06
-uSynergyBool uSynergyConnectDevice(uSynergyCookie cookie)
+uSynergyBool uSynergyConnectDevice(uSynergyCookie cookie, int clientWidth, int clientHeight)
 {
-	cookie->device_name = "qwert";
-	cookie->device_id.bustype = BUS_VIRTUAL;
-	cookie->device_id.vendor  = 1;
-	cookie->device_id.product = 1;
-	cookie->device_id.version = 1;
-	suinput_open(cookie->device_name, &(cookie->device_id));
+	struct input_id device_id;
+	device_id.bustype = BUS_VIRTUAL;
+	device_id.vendor  = 1;
+	device_id.product = 1;
+	device_id.version = 0x0100;
+	//cookie->uinput_keyboard = suinput_open("qwerty", &(cookie->device_id), keyboard);
+	cookie->uinput_mouse = suinput_open("synergy-mouse", &(cookie->device_id), mouse);
+	return USYNERGY_TRUE;
+}
+
+/**
+@brief Screen active callback
+
+This callback is called when Synergy makes the screen active or inactive. This
+callback is usually sent when the mouse enters or leaves the screen.
+
+@param cookie       Cookie supplied in the Synergy context
+@param active       Activation flag, 1 if the screen has become active, 0 if the screen has become inactive
+**/
+void uSynergyScreenActiveCallback(uSynergyCookie cookie, uSynergyBool active)
+{
+	if (active) {
+		/* Screen ative */
+	} else {
+
+	}
+}
+
+/**
+@brief Mouse callback
+
+This callback is called when a mouse events happens. The mouse X and Y position,
+wheel and button state is communicated in the message. It's up to the user to
+interpret if this is a mouse up, down, double-click or other message.
+
+@param cookie       Cookie supplied in the Synergy context
+@param x            Mouse X position
+@param y            Mouse Y position
+@param wheelX       Mouse wheel X position
+@param wheelY       Mouse wheel Y position
+@param buttonLeft   Left button pressed status, 0 for released, 1 for pressed
+@param buttonMiddle Middle button pressed status, 0 for released, 1 for pressed
+@param buttonRight  Right button pressed status, 0 for released, 1 for pressed
+**/
+uSynergyBool uSynergyMouseMoveCallback(uSynergyCookie cookie, int32_t x, int32_t y)
+{
+	int ret;
+	ret = suinput_move_pointer(cookie->uinput_mouse, x, y);
+	return USYNERGY_TRUE;
+}
+
+uSynergyBool uSynergyMouseUpCallback(uSynergyCookie cookie, uSynergyBool buttonLeft, uSynergyBool buttonRight, uSynergyBool buttonMiddle)
+{
+	int ret;
+	if (!buttonLeft)
+		ret = suinput_release(cookie->uinput_mouse, BTN_LEFT);
+
+	if (!buttonRight)
+		ret = suinput_release(cookie->uinput_mouse, BTN_RIGHT);
+
+	if (!buttonMiddle)
+		ret = suinput_release(cookie->uinput_mouse, BTN_MIDDLE);
+
+	return USYNERGY_TRUE;
+}
+uSynergyBool uSynergyMouseDownCallback(uSynergyCookie cookie, uSynergyBool buttonLeft, uSynergyBool buttonRight, uSynergyBool buttonMiddle)
+{
+	int ret;
+	if (buttonLeft)
+		ret = suinput_press(cookie->uinput_mouse, BTN_LEFT);
+
+	if (buttonRight)
+		ret = suinput_press(cookie->uinput_mouse, BTN_RIGHT);
+
+	if (buttonMiddle)
+		ret = suinput_press(cookie->uinput_mouse, BTN_MIDDLE);
+
+	return USYNERGY_TRUE;
+}
+uSynergyBool uSynergyMouseWheelCallback(uSynergyCookie cookie, int16_t wheelX, int16_t wheelY)
+{
 	return USYNERGY_TRUE;
 }

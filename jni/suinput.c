@@ -56,7 +56,7 @@ static int suinput_write_syn(int uinput_fd,
   return suinput_write(uinput_fd, EV_SYN, SYN_REPORT, 0);
 }
 
-int suinput_open(const char* device_name, const struct input_id* id)
+int suinput_open(const char* device_name, const struct input_id* id, device_type type)
 {
   int original_errno = 0;
   int uinput_fd = -1;
@@ -79,29 +79,38 @@ int suinput_open(const char* device_name, const struct input_id* id)
   if (ioctl(uinput_fd, UI_SET_EVBIT, EV_KEY) == -1)
     goto err;
 
-  /* Key and button repetition events */
-  if (ioctl(uinput_fd, UI_SET_EVBIT, EV_REP) == -1)
-    goto err;
-
-  /* Relative pointer motions */
-  if (ioctl(uinput_fd, UI_SET_EVBIT, EV_REL) == -1)
-    goto err;
+	if (type == mouse) {
+		/* Relative pointer motions */
+		if (ioctl(uinput_fd, UI_SET_EVBIT, EV_REL) == -1)
+			goto err;
+		/* Configure device to handle relative x and y axis. */
+		if (ioctl(uinput_fd, UI_SET_RELBIT, REL_X) == -1)
+			goto err;
+		if (ioctl(uinput_fd, UI_SET_RELBIT, REL_Y) == -1)
+			goto err;
+		if (ioctl(uinput_fd, UI_SET_RELBIT, REL_WHEEL) == -1)
+			goto err;
+	}
 
   /* Synchronization events, this is probably set implicitely too. */
   if (ioctl(uinput_fd, UI_SET_EVBIT, EV_SYN) == -1)
     goto err;
 
-  /* Configure device to handle relative x and y axis. */
-  if (ioctl(uinput_fd, UI_SET_RELBIT, REL_X) == -1)
-    goto err;
-  if (ioctl(uinput_fd, UI_SET_RELBIT, REL_Y) == -1)
-    goto err;
-
-  /* Configure device to handle all keys, see linux/input.h. */
-  for (i = 0; i < KEY_MAX; i++) {
-    if (ioctl(uinput_fd, UI_SET_KEYBIT, i) == -1)
-      goto err;
-  }
+	if (type == keyboard) {
+		/* Configure device to handle all keys, see linux/input.h. */
+		for (i = 0; i < KEY_MAX; i++) {
+			if (ioctl(uinput_fd, UI_SET_KEYBIT, i) == -1)
+				goto err;
+		}
+		/* Key and button repetition events */
+		if (ioctl(uinput_fd, UI_SET_EVBIT, EV_REP) == -1)
+			goto err;
+	} else if (type == mouse){
+		for (i = BTN_MOUSE; i < BTN_JOYSTICK; i++) {
+			if (ioctl(uinput_fd, UI_SET_KEYBIT, i) == -1)
+				goto err;
+		}
+	}
 
   /* Set device-specific information. */
   memset(&user_dev, 0, sizeof(user_dev));
@@ -170,6 +179,11 @@ int suinput_move_pointer(int uinput_fd, int32_t x, int32_t y)
   if (suinput_write(uinput_fd, EV_REL, REL_X, x))
     return -1;
   return suinput_write_syn(uinput_fd, EV_REL, REL_Y, y);
+}
+
+int suinput_wheel_move(int uinput_fd, int32_t x)
+{
+
 }
 
 int suinput_press(int uinput_fd, uint16_t code)
