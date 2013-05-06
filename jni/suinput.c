@@ -92,13 +92,13 @@ int suinput_open(const char* device_name, const struct input_id* id, device_type
 			goto err;
 	}
 
-  /* Synchronization events, this is probably set implicitely too. */
-  if (ioctl(uinput_fd, UI_SET_EVBIT, EV_SYN) == -1)
-    goto err;
+	/* Synchronization events, this is probably set implicitely too. */
+	if (ioctl(uinput_fd, UI_SET_EVBIT, EV_SYN) == -1)
+		goto err;
 
 	if (type == keyboard) {
 		/* Configure device to handle all keys, see linux/input.h. */
-		for (i = 0; i < KEY_MAX; i++) {
+		for (i = 0; i < KEY_COMPOSE; i++) {
 			if (ioctl(uinput_fd, UI_SET_KEYBIT, i) == -1)
 				goto err;
 		}

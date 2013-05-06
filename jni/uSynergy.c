@@ -28,8 +28,7 @@ freely, subject to the following restrictions:
 #include <stdio.h>
 #include <string.h>
 
-
-
+#define msleep(n) usleep(n*1000)
 //---------------------------------------------------------------------------------------------------------------------
 //	Internal helpers
 //---------------------------------------------------------------------------------------------------------------------
@@ -167,6 +166,7 @@ static void sSendMouseMoveCallback(uSynergyContext *context)
 	ret = context->m_mouseMoveCallback(context->m_cookie, rel_x, rel_y);
 
 	if (ret == USYNERGY_TRUE) {
+//printf("%d:%d -> %d:%d\n", context->m_mouseX_old, context->m_mouseY_old, context->m_mouseX, context->m_mouseY);
 		context->m_mouseX_old = context->m_mouseX;
 		context->m_mouseY_old = context->m_mouseY;
 	}
@@ -297,16 +297,16 @@ static void sProcessMessage(uSynergyContext *context, const uint8_t *message)
 		// Screen enter. Reply with CNOP
 		//		kMsgCEnter 			= "CINN%2i%2i%4i%2i"
 
+		context->m_mouseX_old = sNetToNative16(message + 8);
+		context->m_mouseY_old = sNetToNative16(message + 10);
+
 		// Obtain the Synergy sequence number
 		context->m_sequenceNumber = sNetToNative32(message + 12);
 		context->m_isCaptured = USYNERGY_TRUE;
 
 		// Call callback
-		if (context->m_screenActiveCallback != 0L) {
-			context->m_mouseX_old = context->m_clientWidth / 2;
-			context->m_mouseY_old = context->m_clientHeight / 2;
+		if (context->m_screenActiveCallback != 0L)
 			context->m_screenActiveCallback(context->m_cookie, USYNERGY_TRUE);
-		}
 	}
 	else if (USYNERGY_IS_PACKET("COUT"))
 	{
@@ -492,7 +492,7 @@ static void sProcessMessage(uSynergyContext *context, const uint8_t *message)
 static sSetMachineState(uSynergyContext *context)
 {
 	context->m_clientName		= "Android";
-	context->m_clientWidth		= 1070;
+	context->m_clientWidth		= 1024;
 	context->m_clientHeight		= 600;
 	context->m_connectFunc		= uSynergyConnectFunc;
 	context->m_receiveFunc		= uSynergyReceiveFunc;
@@ -505,6 +505,7 @@ static sSetMachineState(uSynergyContext *context)
 	context->m_mouseDownCallback= uSynergyMouseDownCallback;
 	context->m_mouseWheelCallback	= uSynergyMouseWheelCallback;
 	context->m_keyboardCallback	= uSynergyKeyboardCallback;
+	context->m_sleepFunc		= uSynergySleepFunc;
 }
 
 /**
@@ -624,9 +625,9 @@ void uSynergyInit(uSynergyContext *context)
 	/* Zero memory */
 	memset(context, 0, sizeof(uSynergyContext));
 
-	uSynergyCookie cookie;
-	cookie = malloc(sizeof(uSynergyCookie));
-	memset(cookie, 0, sizeof(uSynergyCookie));
+	CookieType *cookie;
+	cookie = malloc(sizeof(CookieType));
+	memset(cookie, 0, sizeof(CookieType));
 	context->m_cookie = cookie;
 
 	/* Initialize to default state */
@@ -712,7 +713,7 @@ uSynergyBool uSynergyConnectFunc(uSynergyCookie cookie)
 	memset(&(cookie->server_addr), 0, sizeof(struct sockaddr));
 	cookie->server_addr.sin_family = AF_INET;
 	cookie->server_addr.sin_port = htons(24800);
-	cookie->server_addr.sin_addr.s_addr = inet_addr("10.11.71.114");
+	cookie->server_addr.sin_addr.s_addr = inet_addr("10.11.71.124");
 	//cookie->server_addr.sin_addr.s_addr = inet_addr("192.168.0.105");
 
 	cookie->sockfd = socket(AF_INET, SOCK_STREAM, 0);
@@ -798,6 +799,7 @@ uSynergyBool uSynergyConnectDevice(uSynergyCookie cookie, int clientWidth, int c
 	device_id.vendor  = 1;
 	device_id.product = 1;
 	device_id.version = 0x0100;
+
 	cookie->uinput_keyboard = suinput_open("qwerty", &(cookie->device_id), keyboard);
 	cookie->uinput_mouse = suinput_open("synergy-mouse", &(cookie->device_id), mouse);
 	return USYNERGY_TRUE;
@@ -895,4 +897,19 @@ void uSynergyKeyboardCallback(uSynergyCookie cookie, uint16_t key, uint16_t modi
 		ret = suinput_press(cookie->uinput_keyboard, key);
 	else
 		ret = suinput_release(cookie->uinput_keyboard, key);
+}
+
+/**
+@brief Thread sleep function
+
+This function is called when uSynergy wants to suspend operation for a while before retrying an operation. It
+is mostly used when a socket times out or disconnect occurs to prevent uSynergy from continuously hammering a
+network connection in case the network is down.
+
+@param cookie       Cookie supplied in the Synergy context
+@param timeMs       Time to sleep the current thread (in milliseconds)
+**/
+void uSynergySleepFunc(uSynergyCookie cookie, int timeMs)
+{
+	msleep(timeMs);
 }

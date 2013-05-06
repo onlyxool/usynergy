@@ -90,7 +90,7 @@ typedef struct {
 	int uinput_keyboard;
 	int uinput_mouse;
 	int uinput_joystick;
-} *uSynergyCookie;
+} CookieType, *uSynergyCookie;
 
 
 
@@ -203,7 +203,7 @@ network connection in case the network is down.
 @param cookie		Cookie supplied in the Synergy context
 @param timeMs		Time to sleep the current thread (in milliseconds)
 **/
-typedef void		(*uSynergySleepFunc)(uSynergyCookie cookie, int timeMs);
+void uSynergySleepFunc(uSynergyCookie cookie, int timeMs);
 
 
 
@@ -337,7 +337,7 @@ typedef struct
 	uSynergyBool (*m_receiveFunc)(uSynergyCookie cookie,
 		uint8_t *buffer, int maxLength, int* outLength);	/* Receive data function */
 	uSynergyBool (*m_connectDevice)(uSynergyCookie cookie, int clientWidth, int clientHeight);	/* connetct input device */
-	uSynergySleepFunc				m_sleepFunc;									/* Thread sleep function */
+	void (*m_sleepFunc)(uSynergyCookie cookie, int timeMs);	/* Thread sleep function */
 	uint32_t    (*m_getTimeFunc)();							/* Get current time function */
 	const char*						m_clientName;									/* Name of Synergy Screen / Client */
 	uint16_t						m_clientWidth;									/* Width of screen */
