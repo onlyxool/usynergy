@@ -24,14 +24,12 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "uinput.h"
 #include "suinput.h"
 
-char* UINPUT_FILEPATHS[] = {"/dev/uinput"};
-/*
 char* UINPUT_FILEPATHS[] = {
   "/android/dev/uinput",
   "/dev/uinput",
   "/dev/input/uinput",
   "/dev/misc/uinput",
-};*/
+};
 #define UINPUT_FILEPATHS_COUNT (sizeof(UINPUT_FILEPATHS) / sizeof(char*))
 
 static int suinput_write(int uinput_fd,

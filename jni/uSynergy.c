@@ -28,7 +28,6 @@ freely, subject to the following restrictions:
 #include <stdio.h>
 #include <string.h>
 
-#define msleep(n) usleep(n*1000)
 //---------------------------------------------------------------------------------------------------------------------
 //	Internal helpers
 //---------------------------------------------------------------------------------------------------------------------
@@ -494,18 +493,6 @@ static sSetMachineState(uSynergyContext *context)
 	context->m_clientName		= "Android";
 	context->m_clientWidth		= 1024;
 	context->m_clientHeight		= 600;
-	context->m_connectFunc		= uSynergyConnectFunc;
-	context->m_receiveFunc		= uSynergyReceiveFunc;
-	context->m_sendFunc			= uSynergySendFunc;
-	context->m_getTimeFunc		= uSynergyGetTimeFunc;
-	context->m_connectDevice	= uSynergyConnectDevice;
-	context->m_screenActiveCallback = uSynergyScreenActiveCallback;
-	context->m_mouseMoveCallback	= uSynergyMouseMoveCallback;
-	context->m_mouseUpCallback	= uSynergyMouseUpCallback;
-	context->m_mouseDownCallback= uSynergyMouseDownCallback;
-	context->m_mouseWheelCallback	= uSynergyMouseWheelCallback;
-	context->m_keyboardCallback	= uSynergyKeyboardCallback;
-	context->m_sleepFunc		= uSynergySleepFunc;
 }
 
 /**
@@ -518,7 +505,7 @@ static void sSetDisconnected(uSynergyContext *context)
 	context->m_isCaptured		= USYNERGY_FALSE;
 	context->m_replyCur			= context->m_replyBuffer + 4;
 	context->m_sequenceNumber	= 0;
-	suinput_close(context->m_cookie->uinput_mouse);
+	context->m_disconnectDevice(context->m_cookie);
 }
 
 
@@ -623,7 +610,7 @@ static void sUpdateContext(uSynergyContext *context)
 void uSynergyInit(uSynergyContext *context)
 {
 	/* Zero memory */
-	memset(context, 0, sizeof(uSynergyContext));
+	//memset(context, 0, sizeof(uSynergyContext));
 
 	CookieType *cookie;
 	cookie = malloc(sizeof(CookieType));
@@ -651,7 +638,7 @@ void uSynergyUpdate(uSynergyContext *context)
 		/* Try to connect */
 		if (context->m_connectFunc(context->m_cookie)) {
 			context->m_connected = USYNERGY_TRUE;
-			context->m_connectDevice(context->m_cookie, context->m_clientWidth, context->m_clientHeight);
+			context->m_connectDevice(context->m_cookie);
 		}
 	}
 }
@@ -694,222 +681,4 @@ void uSynergySendClipboard(uSynergyContext *context, const char *text)
 	sAddUInt32(context, text_length);
 	sAddString(context, text);
 	sSendReply(context);
-}
-
-/**
-@brief Connect function
-
-This function is called when uSynergy needs to connect to the host. It doesn't imply a network implementation or
-destination address, that must all be handled on the user side. The function should return USYNERGY_TRUE if a
-connection was established or USYNERGY_FALSE if it could not connect.
-
-When network errors occur (e.g. uSynergySend or uSynergyReceive fail) then the connect call will be called again
-so the implementation of the function must close any old connections and clean up resources before retrying.
-
-@param cookie		Cookie supplied in the Synergy context
-**/
-uSynergyBool uSynergyConnectFunc(uSynergyCookie cookie)
-{
-	memset(&(cookie->server_addr), 0, sizeof(struct sockaddr));
-	cookie->server_addr.sin_family = AF_INET;
-	cookie->server_addr.sin_port = htons(24800);
-	cookie->server_addr.sin_addr.s_addr = inet_addr("10.11.71.124");
-	//cookie->server_addr.sin_addr.s_addr = inet_addr("192.168.0.105");
-
-	cookie->sockfd = socket(AF_INET, SOCK_STREAM, 0);
-	socklen_t addr_len;
-
-	if (connect(cookie->sockfd, (struct sockaddr *)& cookie->server_addr, sizeof(struct sockaddr)) == 0) {
-		return USYNERGY_TRUE;
-	} else {
-		perror("connect error.");
-		return USYNERGY_FALSE;
-	}
-}
-
-/**
-@brief Receive function
-
-This function is called when uSynergy needs to receive data from the default connection. It should return
-USYNERGY_TRUE if receiving data succeeded and USYNERGY_FALSE otherwise. This function should block until data
-has been received and wait for data to become available. If @a outLength is set to 0 upon completion it is
-assumed that the connection is alive, but still in a connecting state and needs time to settle.
-
-@param cookie		Cookie supplied in the Synergy context
-@param buffer		Address of buffer to receive data into
-@param maxLength	Maximum amount of bytes to write into the receive buffer
-@param outLength	Address of integer that receives the actual amount of bytes written into @a buffer
-**/
-uSynergyBool uSynergyReceiveFunc(uSynergyCookie cookie, uint8_t *buffer, int maxLength, int* outLength)
-{
-	int ret;
-	ret = recv(cookie->sockfd, buffer, maxLength, 0);
-	if (ret <= 0)
-		return USYNERGY_FALSE;
-
-	*outLength = ret;
-	return USYNERGY_TRUE;
-}
-
-/**
-@brief Send function
-
-This function is called when uSynergy needs to send something over the default connection. It should return
-USYNERGY_TRUE if sending succeeded and USYNERGY_FALSE otherwise. This function should block until the send
-operation is completed.
-
-@param cookie       Cookie supplied in the Synergy context
-@param buffer       Address of buffer to send
-@param length       Length of buffer to send
-**/
-uSynergyBool uSynergySendFunc(uSynergyCookie cookie, const uint8_t *buffer, int length)
-{
-	int ret;
-	ret = send(cookie->sockfd, buffer, length, 0);
-	if (ret < 0 || ret != length)
-		return USYNERGY_FALSE;
-
-	return USYNERGY_TRUE;
-}
-
-
-/**
-@brief Get time function
-
-This function is called when uSynergy needs to know the current time. This is used to determine when timeouts
-have occured. The time base should be a cyclic millisecond time value.
-
-@returns            Time value in milliseconds
-**/
-uint32_t uSynergyGetTimeFunc()
-{
-	uint32_t ret = 0;
-	time_t now;
-
-	ret = time(&now);
-
-	return ret*1000;
-}
-
-#define BUS_VIRTUAL 0x06
-uSynergyBool uSynergyConnectDevice(uSynergyCookie cookie, int clientWidth, int clientHeight)
-{
-	struct input_id device_id;
-	device_id.bustype = BUS_VIRTUAL;
-	device_id.vendor  = 1;
-	device_id.product = 1;
-	device_id.version = 0x0100;
-
-	cookie->uinput_keyboard = suinput_open("qwerty", &(cookie->device_id), keyboard);
-	cookie->uinput_mouse = suinput_open("synergy-mouse", &(cookie->device_id), mouse);
-	return USYNERGY_TRUE;
-}
-
-/**
-@brief Screen active callback
-
-This callback is called when Synergy makes the screen active or inactive. This
-callback is usually sent when the mouse enters or leaves the screen.
-
-@param cookie       Cookie supplied in the Synergy context
-@param active       Activation flag, 1 if the screen has become active, 0 if the screen has become inactive
-**/
-void uSynergyScreenActiveCallback(uSynergyCookie cookie, uSynergyBool active)
-{
-	if (active) {
-		/* Screen ative */
-	} else {
-
-	}
-}
-
-/**
-@brief Mouse callback
-
-This callback is called when a mouse events happens. The mouse X and Y position,
-wheel and button state is communicated in the message. It's up to the user to
-interpret if this is a mouse up, down, double-click or other message.
-
-@param cookie       Cookie supplied in the Synergy context
-@param x            Mouse X position
-@param y            Mouse Y position
-@param wheelX       Mouse wheel X position
-@param wheelY       Mouse wheel Y position
-@param buttonLeft   Left button pressed status, 0 for released, 1 for pressed
-@param buttonMiddle Middle button pressed status, 0 for released, 1 for pressed
-@param buttonRight  Right button pressed status, 0 for released, 1 for pressed
-**/
-uSynergyBool uSynergyMouseMoveCallback(uSynergyCookie cookie, int32_t x, int32_t y)
-{
-	int ret;
-	ret = suinput_move_pointer(cookie->uinput_mouse, x, y);
-	return USYNERGY_TRUE;
-}
-
-uSynergyBool uSynergyMouseUpCallback(uSynergyCookie cookie, uSynergyBool buttonLeft, uSynergyBool buttonRight, uSynergyBool buttonMiddle)
-{
-	int ret;
-	if (!buttonLeft)
-		ret = suinput_release(cookie->uinput_mouse, BTN_LEFT);
-
-	if (!buttonRight)
-		ret = suinput_release(cookie->uinput_mouse, BTN_RIGHT);
-
-	if (!buttonMiddle)
-		ret = suinput_release(cookie->uinput_mouse, BTN_MIDDLE);
-
-	return USYNERGY_TRUE;
-}
-uSynergyBool uSynergyMouseDownCallback(uSynergyCookie cookie, uSynergyBool buttonLeft, uSynergyBool buttonRight, uSynergyBool buttonMiddle)
-{
-	int ret;
-	if (buttonLeft)
-		ret = suinput_press(cookie->uinput_mouse, BTN_LEFT);
-
-	if (buttonRight)
-		ret = suinput_press(cookie->uinput_mouse, BTN_RIGHT);
-
-	if (buttonMiddle)
-		ret = suinput_press(cookie->uinput_mouse, BTN_MIDDLE);
-
-	return USYNERGY_TRUE;
-}
-uSynergyBool uSynergyMouseWheelCallback(uSynergyCookie cookie, int16_t wheelX, int16_t wheelY)
-{
-	return USYNERGY_TRUE;
-}
-
-/**
-@brief Key event callback
-
-This callback is called when a key is pressed or released.
-
-@param cookie       Cookie supplied in the Synergy context
-@param key          Key code of key that was pressed or released
-@param modifiers    Status of modifier keys (alt, shift, etc.)
-@param down         Down or up status, 1 is key is pressed down, 0 if key is released (up)
-@param repeat       Repeat flag, 1 if the key is down because the key is repeating, 0 if the key is initially pressed by the user
-**/
-void uSynergyKeyboardCallback(uSynergyCookie cookie, uint16_t key, uint16_t modifiers, uSynergyBool down, uSynergyBool repeat)
-{
-	int ret;
-	if (down)
-		ret = suinput_press(cookie->uinput_keyboard, key);
-	else
-		ret = suinput_release(cookie->uinput_keyboard, key);
-}
-
-/**
-@brief Thread sleep function
-
-This function is called when uSynergy wants to suspend operation for a while before retrying an operation. It
-is mostly used when a socket times out or disconnect occurs to prevent uSynergy from continuously hammering a
-network connection in case the network is down.
-
-@param cookie       Cookie supplied in the Synergy context
-@param timeMs       Time to sleep the current thread (in milliseconds)
-**/
-void uSynergySleepFunc(uSynergyCookie cookie, int timeMs)
-{
-	msleep(timeMs);
 }
