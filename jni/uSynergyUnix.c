@@ -25,13 +25,13 @@ freely, subject to the following restrictions:
 */
 
 #include "uSynergy.h"
-#include <stdio.h>
-// TODO: implement callbacks.
+
+extern uSynergyContext uSynergyLinuxContext;
+
 int main(char* argv, int argc) {
-	uSynergyContext context;
-	uSynergyInit(&context);
+	uSynergyInit(&uSynergyLinuxContext);
 
 	for(;;) {
-		uSynergyUpdate(&context);
+		uSynergyUpdate(&uSynergyLinuxContext);
 	}
 }

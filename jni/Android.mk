@@ -14,8 +14,14 @@ LOCAL_SRC_FILES := suinput.c
 include $(BUILD_STATIC_LIBRARY)
 
 include $(CLEAR_VARS)
-LOCAL_MODULE := micro
+LOCAL_MODULE := platform
 LOCAL_STATIC_LIBRARIES := libsuinput
+LOCAL_SRC_FILES := android.c
+include $(BUILD_STATIC_LIBRARY)
+
+include $(CLEAR_VARS)
+LOCAL_MODULE := micro
+LOCAL_STATIC_LIBRARIES := libplatform
 LOCAL_SRC_FILES := uSynergy.c
 include $(BUILD_STATIC_LIBRARY)
 
