@@ -24,7 +24,6 @@ freely, subject to the following restrictions:
    distribution.
 */
 #include "uSynergy.h"
-#include "suinput.h"
 #include <stdio.h>
 #include <string.h>
 
@@ -259,6 +258,7 @@ static void sProcessMessage(uSynergyContext *context, const uint8_t *message)
 			sprintf(buffer, "Connected as client \"%s\"", context->m_clientName);
 			sTrace(context, buffer);
 			context->m_hasReceivedHello = USYNERGY_TRUE;
+			context->m_lastMessageTime = context->m_getTimeFunc();
 		}
 		return;
 	}
@@ -426,6 +426,9 @@ static void sProcessMessage(uSynergyContext *context, const uint8_t *message)
 		sAddString(context, "CALV");
 		sSendReply(context);
 		// now reply with CNOP
+
+		// Update timer
+		context->m_lastMessageTime = context->m_getTimeFunc();
 	}
 	else if (USYNERGY_IS_PACKET("DCLP"))
 	{
@@ -508,93 +511,90 @@ static void sSetDisconnected(uSynergyContext *context)
 	context->m_disconnectDevice(context->m_cookie);
 }
 
+void *sRecvData(void *arg)
+{
+	/* Receive data (blocking) */
+	int receive_size;
+	int num_received = 0;
+	uSynergyContext *context = arg;
 
+	while (context->m_connected) {
+		receive_size = USYNERGY_RECEIVE_BUFFER_SIZE - context->m_receiveOfs;
+		uint8_t tempBuffer[1024];
+		memset(tempBuffer, 0, 1024);
+
+		if (context->m_receiveFunc(context->m_cookie, tempBuffer, 1024,
+				&num_received) == USYNERGY_FALSE) {
+			/* Receive failed, let's try to reconnect */
+			char buffer[128];
+			sprintf(buffer, "Receive failed (%d bytes asked, %d bytes received), \
+				trying to reconnect in a second", receive_size, num_received);
+			sTrace(context, buffer);
+			sSetDisconnected(context);
+			context->m_sleepFunc(context->m_cookie, 1000);
+			return;
+		}
+
+		pthread_mutex_lock(&context->m_receiveMutex);
+		memcpy(context->m_receiveBuffer + context->m_receiveOfs, tempBuffer, num_received);
+		context->m_receiveOfs += num_received;
+		pthread_mutex_unlock(&context->m_receiveMutex);
+
+		/* If we didn't receive any data then we're probably still polling to get
+			connected and therefore not getting any data back. To avoid overloading the
+			system with a Synergy thread that would hammer on polling, we let it rest for
+			a bit if there's no data. */
+		if (num_received == 0)
+			context->m_sleepFunc(context->m_cookie, 500);
+	}
+}
 
 /**
 @brief Update a connected context
 **/
+#define msleep(n) usleep(n*1000)
 static void sUpdateContext(uSynergyContext *context)
 {
-	/* Receive data (blocking) */
-	int receive_size = USYNERGY_RECEIVE_BUFFER_SIZE - context->m_receiveOfs;
-	int num_received = 0;
 	int packlen = 0;
-	if (context->m_receiveFunc(context->m_cookie, context->m_receiveBuffer+context->m_receiveOfs, receive_size, &num_received) == USYNERGY_FALSE)
-	{
-		/* Receive failed, let's try to reconnect */
-		char buffer[128];
-		sprintf(buffer, "Receive failed (%d bytes asked, %d bytes received), trying to reconnect in a second", receive_size, num_received);
-		sTrace(context, buffer);
-		sSetDisconnected(context);
-		context->m_sleepFunc(context->m_cookie, 1000);
+	int ret;
+	pthread_t receiveThread;
+
+	ret = pthread_create(&receiveThread, NULL, sRecvData, (void *)context);
+	if (ret != 0)
 		return;
-	}
 
-	context->m_receiveOfs += num_received;
+	/* Eat packets */
+	while (context->m_connected) {
+		if (context->m_receiveOfs > 0) {
+			packlen = sNetToNative32(context->m_receiveBuffer);
+			if (packlen+4 <= context->m_receiveOfs) {
 
-	/*	If we didn't receive any data then we're probably still polling to get connected and
-		therefore not getting any data back. To avoid overloading the system with a Synergy
-		thread that would hammer on polling, we let it rest for a bit if there's no data. */
-	if (num_received == 0)
-		context->m_sleepFunc(context->m_cookie, 500);
+			//printf("%c%c%c%c offset:%d packlen:%d\n\n", context->m_receiveBuffer[4], context->m_receiveBuffer[5],
+			//	context->m_receiveBuffer[6], context->m_receiveBuffer[7], context->m_receiveOfs,packlen);
 
-	/* Check for timeouts */
-	if (context->m_hasReceivedHello)
-	{
-		uint32_t cur_time = context->m_getTimeFunc();
-		if (num_received == 0)
-		{
+				/* Process message */
+				sProcessMessage(context, context->m_receiveBuffer);
+
+				pthread_mutex_lock(&context->m_receiveMutex);
+				/* Move packet to front of buffer */
+				packlen = sNetToNative32(context->m_receiveBuffer);
+				memmove(context->m_receiveBuffer, context->m_receiveBuffer +
+					packlen + 4, context->m_receiveOfs - packlen - 4);
+				context->m_receiveOfs -= packlen+4;
+
+				memset(context->m_receiveBuffer + context->m_receiveOfs, 0,
+					USYNERGY_RECEIVE_BUFFER_SIZE - context->m_receiveOfs);
+				pthread_mutex_unlock(&context->m_receiveMutex);
+			}
+		} else if (context->m_hasReceivedHello){
+			/* Check for timeouts */
+			uint32_t cur_time = context->m_getTimeFunc();
 			/* Timeout after 2 secs of inactivity (we received no CALV) */
 			if ((cur_time - context->m_lastMessageTime) > USYNERGY_IDLE_TIMEOUT)
 				sSetDisconnected(context);
 		}
-		else
-			context->m_lastMessageTime = cur_time;
 	}
-
-	/* Eat packets */
-	for (;;)
-	{
-		/* Grab packet length and bail out if the packet goes beyond the end of the buffer */
-		packlen = sNetToNative32(context->m_receiveBuffer);
-		if (packlen+4 > context->m_receiveOfs)
-			break;
-		/* Process message */
-		sProcessMessage(context, context->m_receiveBuffer);
-		/* Move packet to front of buffer */
-		memmove(context->m_receiveBuffer, context->m_receiveBuffer+packlen+4, context->m_receiveOfs-packlen-4);
-		context->m_receiveOfs -= packlen+4;
-	}
-
-	/* Throw away over-sized packets */
-	if (packlen > USYNERGY_RECEIVE_BUFFER_SIZE)
-	{
-		/* Oversized packet, ditch tail end */
-		char buffer[128];
-		sprintf(buffer, "Oversized packet: '%c%c%c%c' (length %d)", context->m_receiveBuffer[4], context->m_receiveBuffer[5], context->m_receiveBuffer[6], context->m_receiveBuffer[7], packlen);
-		printf("Oversized packet: '%c%c%c%c' (length %d)\n", context->m_receiveBuffer[4], context->m_receiveBuffer[5], context->m_receiveBuffer[6], context->m_receiveBuffer[7], packlen);
-		sTrace(context, buffer);
-		num_received = context->m_receiveOfs-4; // 4 bytes for the size field
-		while (num_received != packlen)
-		{
-			int buffer_left = packlen - num_received;
-			int to_receive = buffer_left < USYNERGY_RECEIVE_BUFFER_SIZE ? buffer_left : USYNERGY_RECEIVE_BUFFER_SIZE;
-			int ditch_received = 0;
-			if (context->m_receiveFunc(context->m_cookie, context->m_receiveBuffer, to_receive, &ditch_received) == USYNERGY_FALSE)
-			{
-				/* Receive failed, let's try to reconnect */
-				sTrace(context, "Receive failed, trying to reconnect in a second");
-				sSetDisconnected(context);
-				context->m_sleepFunc(context->m_cookie, 1000);
-				break;
-			}
-			else
-			{
-				num_received += ditch_received;
-			}
-		}
-		context->m_receiveOfs = 0;
-	}
+	pthread_join(receiveThread, NULL);
 }
 
 
@@ -610,8 +610,6 @@ static void sUpdateContext(uSynergyContext *context)
 void uSynergyInit(uSynergyContext *context)
 {
 	/* Zero memory */
-	//memset(context, 0, sizeof(uSynergyContext));
-
 	CookieType *cookie;
 	cookie = malloc(sizeof(CookieType));
 	memset(cookie, 0, sizeof(CookieType));
@@ -631,7 +629,11 @@ void uSynergyUpdate(uSynergyContext *context)
 	if (context->m_connected)
 	{
 		/* Update context, receive data, call callbacks */
+		pthread_mutexattr_t attr;
+		pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_RECURSIVE);
+		pthread_mutex_init(&context->m_receiveMutex, &attr);
 		sUpdateContext(context);
+		pthread_mutex_destroy(&context->m_receiveMutex);
 	}
 	else
 	{

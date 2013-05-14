@@ -21,6 +21,7 @@ include $(BUILD_STATIC_LIBRARY)
 
 include $(CLEAR_VARS)
 LOCAL_MODULE := micro
+LOCAL_LDLIBS := -lpthread
 LOCAL_STATIC_LIBRARIES := libplatform
 LOCAL_SRC_FILES := uSynergy.c
 include $(BUILD_STATIC_LIBRARY)

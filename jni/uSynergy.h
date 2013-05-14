@@ -26,6 +26,7 @@ freely, subject to the following restrictions:
 #include <stdint.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
+#include <pthread.h>
 
 #include "uinput.h"
 
@@ -114,7 +115,7 @@ enum uSynergyClipboardFormat
 #define				USYNERGY_PROTOCOL_MAJOR			1				/* Major protocol version */
 #define				USYNERGY_PROTOCOL_MINOR			4				/* Minor protocol version */
 
-#define				USYNERGY_IDLE_TIMEOUT			2000			/* Timeout in milliseconds before reconnecting */
+#define				USYNERGY_IDLE_TIMEOUT			5000			/* Timeout in milliseconds before reconnecting */
 
 #define				USYNERGY_TRACE_BUFFER_SIZE		1024			/* Maximum length of traced message */
 #define				USYNERGY_REPLY_BUFFER_SIZE		1024			/* Maximum size of a reply packet */
@@ -191,6 +192,7 @@ typedef struct //uSynergyContext
 	uint32_t						m_sequenceNumber;								/* Packet sequence number */
 	uint8_t							m_receiveBuffer[USYNERGY_RECEIVE_BUFFER_SIZE];	/* Receive buffer */
 	int								m_receiveOfs;									/* Receive buffer offset */
+	pthread_mutex_t					m_receiveMutex;
 	uint8_t							m_replyBuffer[USYNERGY_REPLY_BUFFER_SIZE];		/* Reply buffer */
 	uint8_t*						m_replyCur;										/* Write offset into reply buffer */
 	uint16_t						m_mouseX_old;
