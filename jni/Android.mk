@@ -32,3 +32,15 @@ LOCAL_MODULE := usynergy
 LOCAL_STATIC_LIBRARIES := libmicro
 LOCAL_SRC_FILES := uSynergyUnix.c
 include $(BUILD_EXECUTABLE)
+
+#include $(CLEAR_VARS)
+#LOCAL_MODULE := usynergy
+#LOCAL_MODULE_FILENAME := libusynergy
+#LOCAL_SRC_FILES := android.c \
+#				   Interface.c \
+#				   suinput.c \
+#				   uSynergy.c \
+#				   uSynergyUnix.c \
+#LOCAL_C_INCLUDES := \
+#					$(LOCAL_PATH)/jni \
+#include $(BUILD_SHARED_LIBRARY)
