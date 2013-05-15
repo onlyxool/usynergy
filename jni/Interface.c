@@ -1,47 +1,50 @@
 #include <jni.h>
 
-/**
- * init() Initialization 
+/*
+ * init() Initialization
  * jint  0:success 1:faild
  */
-
-jint java_io_brotherhood_usynergy_MainActivity_init(JNIEnv *env,jobject thiz){
+jint java_io_brotherhood_usynergy_MainActivity_init(JNIEnv *env, jobject thiz)
+{
 
 }
 
-/**
- * start() 
+/*
+ * start()
  * jint  0:success 1:faild
  */
-
-jint java_io_brotherhood_usynergy_MainActivity_start(JNIEnv *env,jobject thiz){
+jint java_io_brotherhood_usynergy_MainActivity_start(JNIEnv *env, jobject thiz)
+{
 
 }
 
-/**
- * shutdown() 
+/*
+ * shutdown()
  * jint  0:success 1:faild
  */
-
-jint java_io_brotherhood_usynergy_MainActivity_shutdown(JNIEnv *env,jobject thiz){
+jint java_io_brotherhood_usynergy_MainActivity_shutdown(JNIEnv *env,
+	jobject thiz)
+{
 
 }
 
-/**
- * setName() set Client Name 
+/*
+ * setName() set Client Name
  * jint  0:success 1:faild
  */
-
-jint java_io_brotherhood_usynergy_MainActivity_setName(JNIEnv *env,jobject thiz,jstring clientName){
+jint java_io_brotherhood_usynergy_MainActivity_setName(JNIEnv *env,
+	jobject thiz, jstring clientName)
+{
 
 }
 
 
-/**
- * setIp() set IP address 
+/*
+ * setIp() set IP address
  * jint  0:success 1:faild
  */
-
-jint java_io_brotherhood_usynergy_MainActivity_setIp(JNIEnv *env,jobject thiz,jstring ipAdd){
+jint java_io_brotherhood_usynergy_MainActivity_setIp(JNIEnv *env,jobject thiz,
+	jstring ipAdd)
+{
 
 }

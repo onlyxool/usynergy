@@ -14,7 +14,8 @@ static uSynergyBool uSynergyConnectFunc(uSynergyCookie cookie)
 	cookie->sockfd = socket(AF_INET, SOCK_STREAM, 0);
 	socklen_t addr_len;
 
-	if (connect(cookie->sockfd, (struct sockaddr *)& cookie->server_addr, sizeof(struct sockaddr)) == 0) {
+	if (connect(cookie->sockfd, (struct sockaddr *)& cookie->server_addr,
+		sizeof(struct sockaddr)) == 0) {
 		return USYNERGY_TRUE;
 	} else {
 		perror("connect error.");
@@ -22,7 +23,8 @@ static uSynergyBool uSynergyConnectFunc(uSynergyCookie cookie)
 	}
 }
 
-static uSynergyBool uSynergyReceiveFunc(uSynergyCookie cookie, uint8_t *buffer, int maxLength, int* outLength)
+static uSynergyBool uSynergyReceiveFunc(uSynergyCookie cookie, uint8_t *buffer,
+	int maxLength, int* outLength)
 {
 	int ret;
 	ret = recv(cookie->sockfd, buffer, maxLength, 0);
@@ -33,7 +35,8 @@ static uSynergyBool uSynergyReceiveFunc(uSynergyCookie cookie, uint8_t *buffer, 
 	return USYNERGY_TRUE;
 }
 
-static uSynergyBool uSynergySendFunc(uSynergyCookie cookie, const uint8_t *buffer, int length)
+static uSynergyBool uSynergySendFunc(uSynergyCookie cookie,
+	const uint8_t *buffer, int length)
 {
 	int ret;
 	ret = send(cookie->sockfd, buffer, length, 0);
@@ -62,8 +65,11 @@ static uSynergyBool uSynergyConnectDevice(uSynergyCookie cookie)
 	device_id.product = 1;
 	device_id.version = 0x0100;
 
-	cookie->uinput_keyboard = suinput_open("qwerty", &(cookie->device_id), keyboard);
-	cookie->uinput_mouse = suinput_open("synergy-mouse", &(cookie->device_id), mouse);
+	cookie->uinput_keyboard = suinput_open("qwerty", &(cookie->device_id),
+		keyboard);
+	cookie->uinput_mouse = suinput_open("synergy-mouse", &(cookie->device_id),
+		mouse);
+
 	return USYNERGY_TRUE;
 }
 
@@ -73,7 +79,8 @@ static void uSynergyDisconnectDevice(uSynergyCookie cookie)
 	suinput_close(cookie->uinput_keyboard);
 }
 
-static void uSynergyScreenActiveCallback(uSynergyCookie cookie, uSynergyBool active)
+static void uSynergyScreenActiveCallback(uSynergyCookie cookie,
+	uSynergyBool active)
 {
 	if (active) {
 		/* Screen active */
@@ -82,14 +89,16 @@ static void uSynergyScreenActiveCallback(uSynergyCookie cookie, uSynergyBool act
 	}
 }
 
-static uSynergyBool uSynergyMouseMoveCallback(uSynergyCookie cookie, int32_t x, int32_t y)
+static uSynergyBool uSynergyMouseMoveCallback(uSynergyCookie cookie,
+	int32_t x, int32_t y)
 {
 	int ret;
 	ret = suinput_move_pointer(cookie->uinput_mouse, x, y);
 	return USYNERGY_TRUE;
 }
 
-static uSynergyBool uSynergyMouseUpCallback(uSynergyCookie cookie, uSynergyBool buttonLeft, uSynergyBool buttonRight, uSynergyBool buttonMiddle)
+static uSynergyBool uSynergyMouseUpCallback(uSynergyCookie cookie,
+	uSynergyBool buttonLeft, uSynergyBool buttonRight, uSynergyBool buttonMiddle)
 {
 	int ret;
 	if (!buttonLeft)
@@ -104,7 +113,8 @@ static uSynergyBool uSynergyMouseUpCallback(uSynergyCookie cookie, uSynergyBool 
 	return USYNERGY_TRUE;
 }
 
-static uSynergyBool uSynergyMouseDownCallback(uSynergyCookie cookie, uSynergyBool buttonLeft, uSynergyBool buttonRight, uSynergyBool buttonMiddle)
+static uSynergyBool uSynergyMouseDownCallback(uSynergyCookie cookie,
+	uSynergyBool buttonLeft, uSynergyBool buttonRight, uSynergyBool buttonMiddle)
 {
 	int ret;
 	if (buttonLeft)
@@ -119,12 +129,14 @@ static uSynergyBool uSynergyMouseDownCallback(uSynergyCookie cookie, uSynergyBoo
 	return USYNERGY_TRUE;
 }
 
-static uSynergyBool uSynergyMouseWheelCallback(uSynergyCookie cookie, int16_t wheelX, int16_t wheelY)
+static uSynergyBool uSynergyMouseWheelCallback(uSynergyCookie cookie,
+	int16_t wheelX, int16_t wheelY)
 {
 	return USYNERGY_TRUE;
 }
 
-static void uSynergyKeyboardCallback(uSynergyCookie cookie, uint16_t key, uint16_t modifiers, uSynergyBool down, uSynergyBool repeat)
+static void uSynergyKeyboardCallback(uSynergyCookie cookie, uint16_t key,
+	uint16_t modifiers, uSynergyBool down, uSynergyBool repeat)
 {
 	int ret;
 	if (down)
