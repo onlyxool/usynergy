@@ -225,6 +225,8 @@ typedef struct {
 	/* Have we received a 'Hello' from the server? */
 	uSynergyBool m_hasReceivedHello;
 
+	uSynergyBool m_ongoing;
+
 	/* Is Synergy active (i.e. this client is receiving input messages?) */
 	uSynergyBool m_isCaptured;
 

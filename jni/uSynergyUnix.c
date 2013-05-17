@@ -31,7 +31,7 @@ extern uSynergyContext uSynergyLinuxContext;
 int main(char* argv, int argc) {
 	uSynergyInit(&uSynergyLinuxContext);
 
-	for(;;) {
+	for(;uSynergyLinuxContext.m_ongoing == USYNERGY_TRUE;) {
 		uSynergyUpdate(&uSynergyLinuxContext);
 	}
 }

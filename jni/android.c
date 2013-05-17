@@ -8,7 +8,7 @@ static uSynergyBool uSynergyConnectFunc(uSynergyCookie cookie)
 	memset(&(cookie->server_addr), 0, sizeof(struct sockaddr));
 	cookie->server_addr.sin_family = AF_INET;
 	cookie->server_addr.sin_port = htons(24800);
-	cookie->server_addr.sin_addr.s_addr = inet_addr("10.11.71.105");
+	cookie->server_addr.sin_addr.s_addr = inet_addr("10.11.71.173");
 	//cookie->server_addr.sin_addr.s_addr = inet_addr("192.168.0.101");
 
 	cookie->sockfd = socket(AF_INET, SOCK_STREAM, 0);

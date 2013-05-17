@@ -112,6 +112,26 @@ static void sAddUInt32(uSynergyContext *context, uint32_t value)
 	context->m_replyCur = reply;
 }
 
+static sSetMachineState(uSynergyContext *context)
+{
+	context->m_clientName	= "Android";
+	context->m_clientWidth	= 1024;
+	context->m_clientHeight	= 600;
+}
+
+/*
+ * @brief Mark context as being disconnected
+ */
+static void sSetDisconnected(uSynergyContext *context)
+{
+	context->m_connected		= USYNERGY_FALSE;
+	context->m_hasReceivedHello	= USYNERGY_FALSE;
+	context->m_isCaptured		= USYNERGY_FALSE;
+	context->m_replyCur			= context->m_replyBuffer + 4;
+	context->m_sequenceNumber	= 0;
+	context->m_disconnectDevice(context->m_cookie);
+}
+
 /*
  * @brief Send reply packet
  */
@@ -444,6 +464,15 @@ static void sProcessMessage(uSynergyContext *context, const uint8_t *message)
 
 			parse_msg += size;
 		}
+	} else if (USYNERGY_IS_PACKET("EUNK") || USYNERGY_IS_PACKET("EBAD")) {
+		/* kMsgEUnknown = "EUNK" kMsgEBad = "EBAD" */
+		char buffer[64];
+		sprintf(buffer, "Unknow client, please add a client \"%s\" on your \
+			synergy server.\n", context->m_clientName);
+		sTrace(context, buffer);
+		sSetDisconnected(context);
+		context->m_ongoing = USYNERGY_FALSE;
+		return;
 	} else {
 		/* Unknown packet, could be any of these
 		 *		kMsgCNoop 			= "CNOP"
@@ -455,8 +484,6 @@ static void sProcessMessage(uSynergyContext *context, const uint8_t *message)
 		 *		kMsgDMouseRelMove	= "DMRM%2i%2i"
 		 *		kMsgEIncompatible	= "EICV%2i%2i"
 		 *		kMsgEBusy 			= "EBSY"
-		 *		kMsgEUnknown		= "EUNK"
-		 *		kMsgEBad			= "EBAD"
 		 */
 		char buffer[64];
 		sprintf(buffer, "Unknown packet '%c%c%c%c'", message[4], message[5],
@@ -472,26 +499,6 @@ static void sProcessMessage(uSynergyContext *context, const uint8_t *message)
 	sSendReply(context);
 }
 #undef USYNERGY_IS_PACKET
-
-static sSetMachineState(uSynergyContext *context)
-{
-	context->m_clientName		= "Android";
-	context->m_clientWidth		= 1024;
-	context->m_clientHeight		= 600;
-}
-
-/*
- *@brief Mark context as being disconnected
- */
-static void sSetDisconnected(uSynergyContext *context)
-{
-	context->m_connected		= USYNERGY_FALSE;
-	context->m_hasReceivedHello = USYNERGY_FALSE;
-	context->m_isCaptured		= USYNERGY_FALSE;
-	context->m_replyCur			= context->m_replyBuffer + 4;
-	context->m_sequenceNumber	= 0;
-	context->m_disconnectDevice(context->m_cookie);
-}
 
 void *sRecvData(void *arg)
 {
@@ -595,6 +602,7 @@ void uSynergyInit(uSynergyContext *context)
 	cookie = malloc(sizeof(CookieType));
 	memset(cookie, 0, sizeof(CookieType));
 	context->m_cookie = cookie;
+	context->m_ongoing = USYNERGY_TRUE;
 
 	/* Initialize to default state */
 	sSetMachineState(context);
