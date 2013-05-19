@@ -112,13 +112,6 @@ static void sAddUInt32(uSynergyContext *context, uint32_t value)
 	context->m_replyCur = reply;
 }
 
-static sSetMachineState(uSynergyContext *context)
-{
-	context->m_clientName	= "Android";
-	context->m_clientWidth	= 1024;
-	context->m_clientHeight	= 600;
-}
-
 /*
  * @brief Mark context as being disconnected
  */
@@ -595,7 +588,7 @@ static void sUpdateContext(uSynergyContext *context)
 /*
  * @brief Initialize uSynergy context
  */
-void uSynergyInit(uSynergyContext *context)
+void uSynergyInit(uSynergyContext *context, char *ClientName, int width, int height)
 {
 	/* Zero memory */
 	CookieType *cookie;
@@ -605,7 +598,12 @@ void uSynergyInit(uSynergyContext *context)
 	context->m_ongoing = USYNERGY_TRUE;
 
 	/* Initialize to default state */
-	sSetMachineState(context);
+	context->m_clientName = malloc(strlen(ClientName) + 1);
+	strcpy(context->m_clientName, ClientName);
+
+	context->m_clientWidth	= width;
+	context->m_clientHeight	= height;
+
 	sSetDisconnected(context);
 }
 
@@ -670,4 +668,36 @@ void uSynergySendClipboard(uSynergyContext *context, const char *text)
 	sAddUInt32(context, text_length);
 	sAddString(context, text);
 	sSendReply(context);
+}
+
+void uSynergyStart(uSynergyContext *context, char *addr, int port)
+{
+	context->m_updateServerAddr(context->m_cookie, addr, port);
+
+	for(;context->m_ongoing == USYNERGY_TRUE;) {
+		uSynergyUpdate(context);
+	}
+}
+
+void uSynergySetClientName(uSynergyContext *context, char *ClientName)
+{
+	context->m_clientName = realloc(strlen(ClientName) + 1);
+	strcpy(context->m_clientName, ClientName);
+}
+
+void uSynergySetServerName(uSynergyContext *context, char *ServerName)
+{
+
+}
+
+void uSynergyStop(uSynergyContext *context)
+{
+	sSetDisconnected(context);
+	context->m_ongoing == USYNERGY_FALSE;
+}
+
+void uSynergCleanUP(uSynergyContext *context)
+{
+	free(context->m_clientName);
+	free(context->m_cookie);
 }

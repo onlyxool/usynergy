@@ -29,9 +29,8 @@
 extern uSynergyContext uSynergyLinuxContext;
 
 int main(char* argv, int argc) {
-	uSynergyInit(&uSynergyLinuxContext);
+	uSynergyInit(&uSynergyLinuxContext, "Android", 1024, 600);
 
-	for(;uSynergyLinuxContext.m_ongoing == USYNERGY_TRUE;) {
-		uSynergyUpdate(&uSynergyLinuxContext);
-	}
+	uSynergyStart(&uSynergyLinuxContext, "192.168.0.102", 24800);
+	//uSynergyStart(&uSynergyLinuxContext, "10.11.71.173", 24800);
 }

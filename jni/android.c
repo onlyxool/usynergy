@@ -3,22 +3,23 @@
 #include "platform.h"
 #include "suinput.h"
 
-static uSynergyBool uSynergyConnectFunc(uSynergyCookie cookie)
+static void uSynergyUpdateServer(uSynergyCookie cookie, char *addr, int port)
 {
 	memset(&(cookie->server_addr), 0, sizeof(struct sockaddr));
 	cookie->server_addr.sin_family = AF_INET;
-	cookie->server_addr.sin_port = htons(24800);
-	cookie->server_addr.sin_addr.s_addr = inet_addr("10.11.71.173");
-	//cookie->server_addr.sin_addr.s_addr = inet_addr("192.168.0.101");
+	cookie->server_addr.sin_port = htons(port);
+	cookie->server_addr.sin_addr.s_addr = inet_addr(addr);
+}
 
+static uSynergyBool uSynergyConnectFunc(uSynergyCookie cookie)
+{
 	cookie->sockfd = socket(AF_INET, SOCK_STREAM, 0);
-	socklen_t addr_len;
 
 	if (connect(cookie->sockfd, (struct sockaddr *)& cookie->server_addr,
 		sizeof(struct sockaddr)) == 0) {
 		return USYNERGY_TRUE;
 	} else {
-		perror("connect error.");
+		perror("connect error:");
 		return USYNERGY_FALSE;
 	}
 }
@@ -28,8 +29,10 @@ static uSynergyBool uSynergyReceiveFunc(uSynergyCookie cookie, uint8_t *buffer,
 {
 	int ret;
 	ret = recv(cookie->sockfd, buffer, maxLength, 0);
-	if (ret <= 0)
+	if (ret <= 0) {
+		perror("receive error:");
 		return USYNERGY_FALSE;
+	}
 
 	*outLength = ret;
 	return USYNERGY_TRUE;
@@ -152,6 +155,7 @@ static void uSynergySleepFunc(uSynergyCookie cookie, int timeMs)
 }
 
 uSynergyContext uSynergyLinuxContext = {
+	.m_updateServerAddr	= uSynergyUpdateServer,
 	.m_connectFunc      = uSynergyConnectFunc,
 	.m_receiveFunc      = uSynergyReceiveFunc,
 	.m_sendFunc         = uSynergySendFunc,

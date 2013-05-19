@@ -151,6 +151,8 @@ typedef struct {
 	/* Connect function */
 	uSynergyBool (*m_connectFunc)(uSynergyCookie cookie);
 
+	void (*m_updateServerAddr)(uSynergyCookie cookie, char *addr, int port);
+
 	/* Send data function */
 	uSynergyBool (*m_sendFunc)(uSynergyCookie cookie, const uint8_t *buffer,
 		int length);
@@ -293,7 +295,7 @@ typedef struct {
  * Not calling this function will cause undefined behavior.
  * @param context Context to be initialized
  */
-extern void uSynergyInit(uSynergyContext *context);
+extern void uSynergyInit(uSynergyContext *context, char *ClientName, int width, int height);
 
 /*
  * @brief Update uSynergy
@@ -329,6 +331,11 @@ extern void uSynergyUpdate(uSynergyContext *context);
  */
 extern void uSynergySendClipboard(uSynergyContext *context, const char *text);
 
+extern void uSynergyStart(uSynergyContext *context, char *addr, int port);
+
+extern void uSynergyStop(uSynergyContext *context);
+
+extern void uSynergCleanUP(uSynergyContext *context);
 #ifdef __cplusplus
 };
 #endif
