@@ -40,26 +40,8 @@ jint java_io_brotherhood_usynergy_MainActivity_shutdown(JNIEnv *env,
 jint java_io_brotherhood_usynergy_MainActivity_setClientName(JNIEnv *env,
 	jobject thiz, jstring clientName)
 {
-	uSynergySetClientName(&uSynergyLinuxContext, clientName);
-}
-
-/*
- * setServerName() set Sever Name
- */
-jint java_io_brotherhood_usynergy_MainActivity_setServerName(JNIEnv *env,
-	jobject thiz, jstring serverName)
-{
-	uSynergySetServerName(&uSynergyLinuxContext, serverName);
-}
-
-/*
- * setIp() set IP address
- * jint  0:success 1:faild
- */
-jint java_io_brotherhood_usynergy_MainActivity_setSeverIp(JNIEnv *env,
-	jobject thiz, jstring ipAdd)
-{
-
+	uSynergCleanUP(&uSynergyLinuxContext);
+	uSynergyInit(&uSynergyLinuxContextm, clientName, 1024, 600);
 }
 
 jint java_io_brotherhood_usynergy_MainActivity_exit(JNIEnv *env)

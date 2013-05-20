@@ -19,7 +19,7 @@ static uSynergyBool uSynergyConnectFunc(uSynergyCookie cookie)
 		sizeof(struct sockaddr)) == 0) {
 		return USYNERGY_TRUE;
 	} else {
-		perror("connect error:");
+		perror("connect error");
 		return USYNERGY_FALSE;
 	}
 }
@@ -30,7 +30,7 @@ static uSynergyBool uSynergyReceiveFunc(uSynergyCookie cookie, uint8_t *buffer,
 	int ret;
 	ret = recv(cookie->sockfd, buffer, maxLength, 0);
 	if (ret <= 0) {
-		perror("receive error:");
+		perror("receive error");
 		return USYNERGY_FALSE;
 	}
 
@@ -56,7 +56,7 @@ static uint32_t uSynergyGetTimeFunc()
 
 	ret = time(&now);
 
-	return ret*1000;
+	return ret * 1000;
 }
 
 #define BUS_VIRTUAL 0x06

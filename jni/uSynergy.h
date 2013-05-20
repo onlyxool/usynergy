@@ -80,7 +80,6 @@ typedef int uSynergyBool;
  */
 typedef struct {
 	int sockfd;
-	char *server_name;
 	struct sockaddr_in server_addr;
 	char *device_name;
 	struct input_id device_id;

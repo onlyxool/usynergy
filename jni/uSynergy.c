@@ -588,8 +588,10 @@ static void sUpdateContext(uSynergyContext *context)
 /*
  * @brief Initialize uSynergy context
  */
-void uSynergyInit(uSynergyContext *context, char *ClientName, int width, int height)
+void uSynergyInit(uSynergyContext *context, char *ClientName,
+	int width, int height)
 {
+	char *tempStr;
 	/* Zero memory */
 	CookieType *cookie;
 	cookie = malloc(sizeof(CookieType));
@@ -598,8 +600,8 @@ void uSynergyInit(uSynergyContext *context, char *ClientName, int width, int hei
 	context->m_ongoing = USYNERGY_TRUE;
 
 	/* Initialize to default state */
-	context->m_clientName = malloc(strlen(ClientName) + 1);
-	strcpy(context->m_clientName, ClientName);
+	tempStr = malloc(strlen(ClientName) + 1);
+	context->m_clientName = strcpy(tempStr, ClientName);
 
 	context->m_clientWidth	= width;
 	context->m_clientHeight	= height;
@@ -679,17 +681,6 @@ void uSynergyStart(uSynergyContext *context, char *addr, int port)
 	}
 }
 
-void uSynergySetClientName(uSynergyContext *context, char *ClientName)
-{
-	context->m_clientName = realloc(strlen(ClientName) + 1);
-	strcpy(context->m_clientName, ClientName);
-}
-
-void uSynergySetServerName(uSynergyContext *context, char *ServerName)
-{
-
-}
-
 void uSynergyStop(uSynergyContext *context)
 {
 	sSetDisconnected(context);
@@ -698,6 +689,6 @@ void uSynergyStop(uSynergyContext *context)
 
 void uSynergCleanUP(uSynergyContext *context)
 {
-	free(context->m_clientName);
-	free(context->m_cookie);
+	free((void *)context->m_clientName);
+	free((void *)context->m_cookie);
 }
