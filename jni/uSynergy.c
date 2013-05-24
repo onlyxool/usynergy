@@ -498,15 +498,17 @@ void *sRecvData(void *arg)
 	/* Receive data (blocking) */
 	int receive_size;
 	int num_received = 0;
+	uint8_t *packhead = NULL;
+	uint8_t netRecvBuffer[USYNERGY_NETRECV_BUFFER_SIZE];
+	int packlen, recvSumLen, netrecvOfs = 0;
 	uSynergyContext *context = arg;
 
 	while (context->m_connected) {
-		receive_size = USYNERGY_RECEIVE_BUFFER_SIZE - context->m_receiveOfs;
-		uint8_t tempBuffer[1024];
-		memset(tempBuffer, 0, 1024);
+		receive_size = USYNERGY_NETRECV_BUFFER_SIZE - netrecvOfs;
+		memset(netRecvBuffer + netrecvOfs, 0, receive_size);
 
-		if (context->m_receiveFunc(context->m_cookie, tempBuffer, 1024,
-				&num_received) == USYNERGY_FALSE) {
+		if (context->m_receiveFunc(context->m_cookie, netRecvBuffer + netrecvOfs,
+			receive_size, &num_received) == USYNERGY_FALSE) {
 			/* Receive failed, let's try to reconnect */
 			char buffer[128];
 			sprintf(buffer, "Receive failed (%d bytes asked, %d bytes received), \
@@ -518,67 +520,94 @@ void *sRecvData(void *arg)
 		}
 
 		pthread_mutex_lock(&context->m_receiveMutex);
-		memcpy(context->m_receiveBuffer + context->m_receiveOfs, tempBuffer, num_received);
-		context->m_receiveOfs += num_received;
-		pthread_mutex_unlock(&context->m_receiveMutex);
+		packhead = netRecvBuffer;
+		packlen = sNetToNative32(packhead);
+		recvSumLen = packlen + 4;
 
-		/* If we didn't receive any data then we're probably still polling to
-		 *	get connected and therefore not getting any data back. To avoid
-		 *	overloading the system with a Synergy thread that would hammer on
-		 *	polling, we let it rest for a bit if there's no data.
-		 */
-		if (num_received == 0)
-			context->m_sleepFunc(context->m_cookie, 500);
+		while (1) {
+//printf("packlen::%d %c%c%c%c\n", packlen, *(packhead+4), *(packhead+5), *(packhead+6), *(packhead+7));
+			if (recvSumLen < num_received + netrecvOfs) {
+				memcpy(context->m_receiveBuffer + context->m_receiveOfs,
+					packhead, packlen + 4);
+				context->m_receiveOfs += (packlen + 4);
+				sem_post(&context->reciveOfsSem);
+
+				packhead = packhead + packlen + 4;
+				packlen = sNetToNative32(packhead);
+				recvSumLen = recvSumLen + packlen + 4;
+			} else if (recvSumLen > num_received + netrecvOfs) {
+				/* Incomplete package */
+				netrecvOfs = (packlen + 4) - (recvSumLen - num_received);
+				if (packhead != netRecvBuffer)
+					memmove(netRecvBuffer, packhead, netrecvOfs);
+				break;
+			} else {
+				memcpy(context->m_receiveBuffer + context->m_receiveOfs,
+					packhead, packlen + 4);
+				context->m_receiveOfs += (packlen + 4);
+				sem_post(&context->reciveOfsSem);
+				netrecvOfs = 0;
+				break;
+			}
+		}
+		pthread_mutex_unlock(&context->m_receiveMutex);
 	}
 }
 
 /*
  * @brief Update a connected context
  */
-#define msleep(n) usleep(n*1000)
 static void sUpdateContext(uSynergyContext *context)
 {
 	int packlen = 0;
 	int ret;
 	pthread_t receiveThread;
 
-	ret = pthread_create(&receiveThread, NULL, sRecvData, (void *)context);
-	if (ret != 0)
-		return;
+	if (pthread_create(&receiveThread, NULL, sRecvData, (void *)context))
+		goto pthread_err;
+
+	if (sem_init(&context->reciveOfsSem, 0, 0))
+		goto semaphore_err;
 
 	/* Eat packets */
 	while (context->m_connected) {
-		if (context->m_receiveOfs > 0) {
+		sem_wait(&context->reciveOfsSem);
+		packlen = sNetToNative32(context->m_receiveBuffer);
+		if (packlen+4 <= context->m_receiveOfs) {
+
+//			printf("%c%c%c%c offset:%d packlen:%d\n", context->m_receiveBuffer[4],
+//				context->m_receiveBuffer[5], context->m_receiveBuffer[6],
+//				context->m_receiveBuffer[7], context->m_receiveOfs,packlen);
+
+			/* Process message */
+			sProcessMessage(context, context->m_receiveBuffer);
+
+			pthread_mutex_lock(&context->m_receiveMutex);
+			/* Move packet to front of buffer */
 			packlen = sNetToNative32(context->m_receiveBuffer);
-			if (packlen+4 <= context->m_receiveOfs) {
+			memmove(context->m_receiveBuffer, context->m_receiveBuffer +
+				packlen + 4, context->m_receiveOfs - packlen - 4);
+			context->m_receiveOfs -= packlen+4;
 
-//				printf("%c%c%c%c offset:%d packlen:%d\n\n", context->m_receiveBuffer[4],
-//					context->m_receiveBuffer[5], context->m_receiveBuffer[6],
-//					context->m_receiveBuffer[7], context->m_receiveOfs,packlen);
-
-				/* Process message */
-				sProcessMessage(context, context->m_receiveBuffer);
-
-				pthread_mutex_lock(&context->m_receiveMutex);
-				/* Move packet to front of buffer */
-				packlen = sNetToNative32(context->m_receiveBuffer);
-				memmove(context->m_receiveBuffer, context->m_receiveBuffer +
-					packlen + 4, context->m_receiveOfs - packlen - 4);
-				context->m_receiveOfs -= packlen+4;
-
-				memset(context->m_receiveBuffer + context->m_receiveOfs, 0,
-					USYNERGY_RECEIVE_BUFFER_SIZE - context->m_receiveOfs);
-				pthread_mutex_unlock(&context->m_receiveMutex);
-			}
-		} else if (context->m_hasReceivedHello) {
-			/* Check for timeouts */
-			uint32_t cur_time = context->m_getTimeFunc();
-			/* Timeout after 2 secs of inactivity (we received no CALV) */
-			if ((cur_time - context->m_lastMessageTime) > USYNERGY_IDLE_TIMEOUT)
-				sSetDisconnected(context);
+			memset(context->m_receiveBuffer + context->m_receiveOfs, 0,
+				USYNERGY_RECEIVE_BUFFER_SIZE - context->m_receiveOfs);
+			pthread_mutex_unlock(&context->m_receiveMutex);
 		}
+//		} else if (context->m_hasReceivedHello) {
+			/* Check for timeouts */
+//			uint32_t cur_time = context->m_getTimeFunc();
+			/* Timeout after 2 secs of inactivity (we received no CALV) */
+//			if ((cur_time - context->m_lastMessageTime) > USYNERGY_IDLE_TIMEOUT)
+//				sSetDisconnected(context);
+//		}
 	}
 	pthread_join(receiveThread, NULL);
+	return;
+
+semaphore_err:
+	sem_destroy(&context->reciveOfsSem);
+pthread_err:
+	perror("thread create error");
 }
 
 //-----------------------------------------------------------------------------

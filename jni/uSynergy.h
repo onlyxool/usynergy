@@ -28,6 +28,7 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <pthread.h>
+#include <semaphore.h>
 
 #include "uinput.h"
 
@@ -122,6 +123,9 @@ enum uSynergyClipboardFormat {
 #define USYNERGY_REPLY_BUFFER_SIZE		1024
 /* Maximum size of an incoming packet */
 #define USYNERGY_RECEIVE_BUFFER_SIZE	4096
+/* Maximum size of a receive packet*/
+#define USYNERGY_NETRECV_BUFFER_SIZE	1024
+
 
 /*
  * @brief Keyboard constants
@@ -244,6 +248,9 @@ typedef struct {
 	int	m_receiveOfs;
 
 	pthread_mutex_t m_receiveMutex;
+
+	/* semaphore of package number in receive Buffer*/
+	sem_t reciveOfsSem;
 
 	/* Reply buffer */
 	uint8_t	m_replyBuffer[USYNERGY_REPLY_BUFFER_SIZE];
