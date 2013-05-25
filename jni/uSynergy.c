@@ -515,7 +515,8 @@ void *sRecvData(void *arg)
 				trying to reconnect in a second", receive_size, num_received);
 			sTrace(context, buffer);
 			sSetDisconnected(context);
-			context->m_sleepFunc(context->m_cookie, 1000);
+			sem_post(&context->reciveOfsSem);
+			context->m_sleepFunc(context->m_cookie, 100);
 			return;
 		}
 
@@ -573,8 +574,8 @@ static void sUpdateContext(uSynergyContext *context)
 	while (context->m_connected) {
 		sem_wait(&context->reciveOfsSem);
 		packlen = sNetToNative32(context->m_receiveBuffer);
-		if (packlen+4 <= context->m_receiveOfs) {
-
+//		if (packlen+4 <= context->m_receiveOfs) {
+		if (packlen > 0) {
 //			printf("%c%c%c%c offset:%d packlen:%d\n", context->m_receiveBuffer[4],
 //				context->m_receiveBuffer[5], context->m_receiveBuffer[6],
 //				context->m_receiveBuffer[7], context->m_receiveOfs,packlen);
@@ -593,7 +594,7 @@ static void sUpdateContext(uSynergyContext *context)
 				USYNERGY_RECEIVE_BUFFER_SIZE - context->m_receiveOfs);
 			pthread_mutex_unlock(&context->m_receiveMutex);
 		}
-//		} else if (context->m_hasReceivedHello) {
+//		else if (context->m_hasReceivedHello) {
 			/* Check for timeouts */
 //			uint32_t cur_time = context->m_getTimeFunc();
 			/* Timeout after 2 secs of inactivity (we received no CALV) */
@@ -703,9 +704,10 @@ void uSynergySendClipboard(uSynergyContext *context, const char *text)
 
 void uSynergyStart(uSynergyContext *context, char *addr, int port)
 {
+	int i;
 	context->m_updateServerAddr(context->m_cookie, addr, port);
 
-	for(;context->m_ongoing == USYNERGY_TRUE;) {
+	for(i = 0; context->m_ongoing == USYNERGY_TRUE && i < 10; i++) {
 		uSynergyUpdate(context);
 	}
 }

@@ -30,7 +30,7 @@ extern uSynergyContext uSynergyLinuxContext;
 
 int main(int argc, char **argv)
 {
-	uSynergyInit(&uSynergyLinuxContext, "V3", 1024, 600);
+	uSynergyInit(&uSynergyLinuxContext, "Android", 1024, 600);
 
 	uSynergyStart(&uSynergyLinuxContext, argv[1], 24800);
 }
