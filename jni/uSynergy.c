@@ -28,6 +28,7 @@
 #include <string.h>
 
 #include "uSynergy.h"
+#include "keymap.h"
 
 //-----------------------------------------------------------------------------
 //	Internal helpers
@@ -365,28 +366,30 @@ static void sProcessMessage(uSynergyContext *context, const uint8_t *message)
 		// Key down
 		// kMsgDKeyDown	= "DKDN%2i%2i%2i"
 		// kMsgDKeyDown1_0 = "DKDN%2i%2i"
-//		uint16_t id = sNetToNative16(message+8);
+		uint16_t id = sNetToNative16(message+8);
 		uint16_t mod = sNetToNative16(message+10);
 		uint16_t key = sNetToNative16(message+12);
-		sSendKeyboardCallback(context, key, mod, USYNERGY_TRUE, USYNERGY_FALSE);
+		printf("id:%d key:%d mod:%d\n", id, key, mod);
+		sSendKeyboardCallback(context, keyTranslation[id], mod, USYNERGY_TRUE, USYNERGY_FALSE);
 
 	} else if (USYNERGY_IS_PACKET("DKRP")) {
 		// Key repeat
 		// kMsgDKeyRepeat = "DKRP%2i%2i%2i%2i"
 		// kMsgDKeyRepeat1_0 = "DKRP%2i%2i%2i"
+		uint16_t id = sNetToNative16(message+8);
 		uint16_t mod = sNetToNative16(message+10);
 //		uint16_t count = sNetToNative16(message+12);
 		uint16_t key = sNetToNative16(message+14);
-		sSendKeyboardCallback(context, key, mod, USYNERGY_TRUE, USYNERGY_TRUE);
+		sSendKeyboardCallback(context, keyTranslation[id], mod, USYNERGY_TRUE, USYNERGY_TRUE);
 
 	} else if (USYNERGY_IS_PACKET("DKUP")) {
 		// Key up
 		// kMsgDKeyUp = "DKUP%2i%2i%2i"
 		// kMsgDKeyUp1_0 = "DKUP%2i%2i"
-//		uint16 id=Endian::sNetToNative(sbuf[4]);
+		uint16_t id = sNetToNative16(message+8);
 		uint16_t mod = sNetToNative16(message+10);
 		uint16_t key = sNetToNative16(message+12);
-		sSendKeyboardCallback(context, key, mod, USYNERGY_FALSE, USYNERGY_FALSE);
+		sSendKeyboardCallback(context, keyTranslation[id], mod, USYNERGY_FALSE, USYNERGY_FALSE);
 
 	} else if (USYNERGY_IS_PACKET("DGBT")) {
 		// Joystick buttons
@@ -637,6 +640,7 @@ void uSynergyInit(uSynergyContext *context, char *ClientName,
 	context->m_clientHeight	= height;
 
 	sSetDisconnected(context);
+	build_key_translation_table();
 }
 
 /*
