@@ -1,28 +1,33 @@
-This directory contains the uSynergy project source code.
+# usynergy
+============================================
 
-0. Introduction
+## 0. Introduction
 
 This project is on purpose of implement a compatible synergy client 
 on Android.
 
-Synergy is a mouse and keyboard sharing utility, Synergy lets you
+[Synergy][1] is a mouse and keyboard sharing utility, Synergy lets you
 easily share your mouse and keyboard between multiple computers on
 your desk, and it’s Free and Open Source.
-(See more detail about synergy on http://synergy-foss.org/)
 
-This project is base on Micro Synergyi(μSynergy).
-(http://synergy-foss.org/wiki/Micro_Synergy)_
+This project is base on [Micro Synergyi(μSynergy)][2]. [μSynergy][2] is
 
 
-1. Pre-requirements
+## 1. Pre-requirements
 
 We use the uinput module for user space input driver, so you must have
 a modded Android with access to /dev/uinput (Like Cyanogen). That means
 your android must have /dev/uinput module and this file can be RW by app.
 
-2. How to use it
+## 2. How to use it
 
-3. Appreciation
+## 3. Acknowledgements
 
-1) Alex Evans & Michiel van der Leeuw  (uSynergy client)
-2) Tuomas Räsänen  (suinput)
+1) [Alex Evans][3] & [Michiel van der Leeuw][4]  (uSynergy client)
+2) Tuomas Räsänen [Email][5](suinput)
+
+[1]:http://synergy-foss.org/
+[2]:http://synergy-foss.org/wiki/Micro_Synergy
+[3]:http://en.wikipedia.org/wiki/Alex_Evans_(video_game_developer)
+[4]:http://en.wikipedia.org/wiki/Michiel_van_der_Leeuw
+[5]:tuos@codegrove.org
