@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">uSynergy</string>
+    <string name="about">about</string>
+    <string name="startusynergy">启动uSynergy</string>
+	<string name="start">启动</string>
+	<string name="stop">停止</string>
+	<string name="listconfig">配置列表</string>
+	<string name="addconfig">添加配置</string>
+	<string name="ip">配置列表</string>
+</resources>

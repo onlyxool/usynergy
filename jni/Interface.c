@@ -27,8 +27,7 @@ jint java_io_brotherhood_usynergy_MainActivity_start(JNIEnv *env, jobject thiz)
  * shutdown()
  * jint  0:success 1:faild
  */
-jint java_io_brotherhood_usynergy_MainActivity_shutdown(JNIEnv *env,
-	jobject thiz)
+jint java_io_brotherhood_usynergy_MainActivity_shutdown(JNIEnv *env,jobject thiz)
 {
 	uSynergyStop(&uSynergyLinuxContext);
 }
@@ -37,8 +36,7 @@ jint java_io_brotherhood_usynergy_MainActivity_shutdown(JNIEnv *env,
  * setClientName() set Client Name
  * jint  0:success 1:faild
  */
-jint java_io_brotherhood_usynergy_MainActivity_setClientName(JNIEnv *env,
-	jobject thiz, jstring clientName)
+jint java_io_brotherhood_usynergy_MainActivity_setClientName(JNIEnv *env,jobject thiz, jstring clientName)
 {
 	uSynergCleanUP(&uSynergyLinuxContext);
 	uSynergyInit(&uSynergyLinuxContextm, clientName, 1024, 600);
