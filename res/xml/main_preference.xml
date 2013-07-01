@@ -2,7 +2,7 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
 	<PreferenceCategory android:title="@string/startusynergy">
 		<CheckBoxPreference 
-			android:key="start" 
+			android:key="@string/start" 
 			android:title="@string/startusynergy" 
 			android:summaryOn="@string/start" 
 			android:summaryOff="@string/stop" 
@@ -15,10 +15,16 @@
 			android:entryValues="@array/entryvalues_list_preference"
 			android:dialogTitle="@string/dialog_title_list_preference" /> -->
 	</PreferenceCategory>
-	<PreferenceCategory android:title="@string/listconfig">
+	<PreferenceCategory android:title="@string/screenname">
+	    <EditTextPreference 
+	        android:key="@string/screenname"
+	        android:title="@string/screenname"
+	        android:summary="@string/editscreenname"/>
+	</PreferenceCategory>
+	<PreferenceCategory android:title="@string/cfglist">
 	    <PreferenceScreen
-	        android:key="list"
-	        android:title="@string/listconfig"
-	        android:summary="@string/listconfig"/>
+	        android:key="@string/cfglist"
+	        android:title="@string/cfglist"
+	        android:summary="@string/cfglist"/>
 	</PreferenceCategory>
 </PreferenceScreen>

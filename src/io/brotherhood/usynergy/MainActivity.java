@@ -43,7 +43,7 @@ public class MainActivity extends SherlockPreferenceActivity {
 		if(key==null)
 			return false;
 		Log.i(tag , key);
-		if(key.equals(getString(R.string.listconfig))){
+		if(key.equals(getString(R.string.cfglist))){
 			
 		}
 		return super.onPreferenceTreeClick(preferenceScreen, preference);

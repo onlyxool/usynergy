@@ -4,9 +4,12 @@
     <string name="app_name">uSynergy</string>
     <string name="about">about</string>
     <string name="startusynergy">启动uSynergy</string>
-	<string name="start">启动</string>
-	<string name="stop">停止</string>
-	<string name="listconfig">配置列表</string>
-	<string name="addconfig">添加配置</string>
-	<string name="ip">配置列表</string>
+	<string name="start">start</string>
+	<string name="stop">stop</string>
+	<string name="cfglist">config list</string>
+	<string name="addconfig">add new config</string>
+	<string name="screenname">Screen Name</string>
+	<string name="editscreenname">edit screen name</string>
+	<string name="ip">ip</string>
+
 </resources>

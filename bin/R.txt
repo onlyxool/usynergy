@@ -335,8 +335,10 @@ int string abs__shareactionprovider_share_with 0x7f0a0006
 int string abs__shareactionprovider_share_with_application 0x7f0a0007
 int string addconfig 0x7f0a0013
 int string app_name 0x7f0a000d
-int string ip 0x7f0a0014
-int string listconfig 0x7f0a0012
+int string cfglist 0x7f0a0012
+int string editscreenname 0x7f0a0015
+int string ip 0x7f0a0016
+int string screenname 0x7f0a0014
 int string start 0x7f0a0010
 int string startusynergy 0x7f0a000f
 int string stop 0x7f0a0011

@@ -1040,8 +1040,10 @@ containing a value of this type.
         public static final int abs__shareactionprovider_share_with_application=0x7f0a0007;
         public static final int addconfig=0x7f0a0013;
         public static final int app_name=0x7f0a000d;
-        public static final int ip=0x7f0a0014;
-        public static final int listconfig=0x7f0a0012;
+        public static final int cfglist=0x7f0a0012;
+        public static final int editscreenname=0x7f0a0015;
+        public static final int ip=0x7f0a0016;
+        public static final int screenname=0x7f0a0014;
         public static final int start=0x7f0a0010;
         public static final int startusynergy=0x7f0a000f;
         public static final int stop=0x7f0a0011;
