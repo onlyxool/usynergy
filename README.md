@@ -23,8 +23,8 @@ your android must have /dev/uinput module and this file can be RW by app.
 
 ## 3. Acknowledgements
 
-1) [Alex Evans][3] & [Michiel van der Leeuw][4]  (uSynergy client)
-2) Tuomas Räsänen [Email][5](suinput)
+* [Alex Evans][3] & [Michiel van der Leeuw][4]  (uSynergy client)
+* Tuomas Räsänen [Email][5](suinput)
 
 [1]:http://synergy-foss.org/
 [2]:http://synergy-foss.org/wiki/Micro_Synergy

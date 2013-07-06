@@ -68,9 +68,9 @@ static uSynergyBool uSynergyConnectDevice(uSynergyCookie cookie)
 	device_id.product = 1;
 	device_id.version = 0x0100;
 
-	cookie->uinput_keyboard = suinput_open("qwerty", &(cookie->device_id),
+	cookie->uinput_keyboard = suinput_open("usynergy-keyboard", &(cookie->device_id),
 		keyboard);
-	cookie->uinput_mouse = suinput_open("synergy-mouse", &(cookie->device_id),
+	cookie->uinput_mouse = suinput_open("usynergy-mouse", &(cookie->device_id),
 		mouse);
 
 	return USYNERGY_TRUE;
