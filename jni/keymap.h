@@ -61,6 +61,7 @@ static void build_key_translation_table () {
 	keyTranslation ['Y'] = KEY_Y;
 	keyTranslation ['Z'] = KEY_Z;
 
+	keyTranslation ['`'] = KEY_GRAVE;
 	keyTranslation ['0'] = KEY_0;
 	keyTranslation ['1'] = KEY_1;
 	keyTranslation ['2'] = KEY_2;
@@ -78,6 +79,7 @@ static void build_key_translation_table () {
 	 *  the mask...
 	 */
 
+	keyTranslation ['~'] = KEY_GRAVE;
 	keyTranslation ['!'] = KEY_1;
 	keyTranslation ['@'] = KEY_2;
 	keyTranslation ['#'] = KEY_3;
@@ -98,6 +100,19 @@ static void build_key_translation_table () {
 	keyTranslation ['>'] = KEY_DOT;
 	keyTranslation [','] = KEY_COMMA;
 	keyTranslation ['<'] = KEY_COMMA;
+	keyTranslation [';'] = KEY_SEMICOLON;
+	keyTranslation [':'] = KEY_SEMICOLON;
+	keyTranslation ['\''] = KEY_APOSTROPHE;
+	keyTranslation ['"'] = KEY_APOSTROPHE;
+	keyTranslation ['\\'] = KEY_BACKSLASH;
+	keyTranslation ['|'] = KEY_BACKSLASH;
+	keyTranslation ['['] = KEY_LEFTBRACE;
+	keyTranslation [']'] = KEY_RIGHTBRACE;
+	keyTranslation ['{'] = KEY_LEFTBRACE;
+	keyTranslation ['}'] = KEY_RIGHTBRACE;
+	keyTranslation [61419] = KEY_MENU;
+	keyTranslation [61420] = KEY_MENU;
+
 
 	keyTranslation [61192] = KEY_BACKSPACE;
 	keyTranslation [8] = KEY_BACKSPACE;
@@ -107,6 +122,39 @@ static void build_key_translation_table () {
 	keyTranslation [13] = KEY_ENTER;
 	keyTranslation [32] = KEY_SPACE;
 
+	keyTranslation [61283] = KEY_INSERT;
+	keyTranslation [61439] = KEY_DELETE;
+	keyTranslation [61264] = KEY_HOME;
+	keyTranslation [61271] = KEY_END;
+	keyTranslation [61269] = KEY_PAGEUP;
+	keyTranslation [61270] = KEY_PAGEDOWN;
+
+	//Keypad
+	keyTranslation [61361] = KEY_1;
+	keyTranslation [61362] = KEY_2;
+	keyTranslation [61363] = KEY_3;
+	keyTranslation [61364] = KEY_4;
+	keyTranslation [61365] = KEY_5;
+	keyTranslation [61366] = KEY_6;
+	keyTranslation [61367] = KEY_7;
+	keyTranslation [61368] = KEY_8;
+	keyTranslation [61369] = KEY_9;
+	keyTranslation [61360] = KEY_0;
+	keyTranslation [61358] = KEY_DOT;
+
+	keyTranslation [61354] = KEY_KPASTERISK;
+	keyTranslation [61359] = KEY_SLASH;
+	keyTranslation [61355] = KEY_KPPLUS;
+	keyTranslation [61357] = KEY_MINUS;
+	keyTranslation [61325] = KEY_ENTER;
+	keyTranslation [61343] = KEY_DELETE;
+
+	keyTranslation [61340] = KEY_END;
+	keyTranslation [61339] = KEY_PAGEDOWN;
+	keyTranslation [61333] = KEY_HOME;
+	keyTranslation [61338] = KEY_PAGEUP;
+	keyTranslation [61342] = KEY_INSERT;
+
     // Arrows
 	keyTranslation [61265] = KEY_LEFT;
 	keyTranslation [61266] = KEY_UP;
@@ -114,12 +162,12 @@ static void build_key_translation_table () {
 	keyTranslation [61268] = KEY_DOWN;
 
 	keyTranslation [61193] = KEY_TAB;
-
+	keyTranslation [61413] = KEY_CAPSLOCK;
 	keyTranslation [61410] = KEY_RIGHTSHIFT;
 	keyTranslation [61409] = KEY_LEFTSHIFT;
 
 	keyTranslation [27] = KEY_BACK;      // ESC to BACK
-	keyTranslation [61211] = KEY_BACK;   // ESC to BACK
+	keyTranslation [61211] = KEY_HOME;   // ESC to BACK
 
 	keyTranslation [63236] = KEY_HOME;   // F1 to HOME
 	keyTranslation [63237] = KEY_MENU;   // F2 to MENU

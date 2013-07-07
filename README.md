@@ -10,12 +10,12 @@ on Android.
 easily share your mouse and keyboard between multiple computers on
 your desk, and it’s Free and Open Source.
 
-This project is base on [Micro Synergyi(μSynergy)][2]. [μSynergy][2] is
+This project is base on [Micro Synergyi(μSynergy)][2].
 
 
 ## 1. Pre-requirements
 
-We use the uinput module for user space input driver, so you must have
+usynergy use the uinput module for user space input driver, so you must have
 a modded Android with access to /dev/uinput (Like Cyanogen). That means
 your android must have /dev/uinput module and this file can be RW by app.
 
