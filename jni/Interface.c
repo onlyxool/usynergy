@@ -8,9 +8,9 @@ extern uSynergyContext uSynergyLinuxContext;
  * init() Initialization
  * jint  0:success 1:faild
  */
-jint java_io_brotherhood_usynergy_MainActivity_init(JNIEnv *env, jobject thiz)
+jint java_io_brotherhood_usynergy_MainActivity_init(JNIEnv *env, jobject thiz,jstring screenName,jint hight,jint width)
 {
-	uSynergyInit(&uSynergyLinuxContext, "Android", 1024, 600);
+	uSynergyInit(&uSynergyLinuxContext, screenName, hight, width);
 }
 
 /*

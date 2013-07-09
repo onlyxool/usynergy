@@ -43,11 +43,17 @@ public class MainActivity extends SherlockPreferenceActivity {
 		if(key==null)
 			return false;
 		Log.i(tag , key);
-		if(key.equals(getString(R.string.cfglist))){
+		if(key.equals(getString(R.string.start))){
 			
 		}
 		return super.onPreferenceTreeClick(preferenceScreen, preference);
 	}
+
+	public native void init();
+	public native void start();
+	public native void shutdown();
+	public native void setClientName(String clientName);
+	public native void exit();
 
 	static{
 //		System.loadLibrary("libusynergy");
