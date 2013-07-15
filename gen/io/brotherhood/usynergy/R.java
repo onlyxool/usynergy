@@ -910,10 +910,11 @@ containing a value of this type.
         public static final int abs__textfield_searchview_right_holo_dark=0x7f02006d;
         public static final int abs__textfield_searchview_right_holo_light=0x7f02006e;
         public static final int abs__toast_frame=0x7f02006f;
-        public static final int ic_launcher=0x7f020070;
+        public static final int ic_compose_inverse=0x7f020070;
+        public static final int ic_launcher=0x7f020071;
     }
     public static final class id {
-        public static final int about=0x7f050032;
+        public static final int about=0x7f050037;
         public static final int abs__action_bar=0x7f050020;
         public static final int abs__action_bar_container=0x7f05001f;
         public static final int abs__action_bar_subtitle=0x7f050011;
@@ -956,8 +957,13 @@ containing a value of this type.
         public static final int disableHome=0x7f050009;
         public static final int edit_query=0x7f050026;
         public static final int homeAsUp=0x7f050006;
+        public static final int ipadd=0x7f050033;
+        public static final int ipandport=0x7f050035;
         public static final int listMode=0x7f050002;
         public static final int normal=0x7f050001;
+        public static final int port=0x7f050034;
+        public static final int select=0x7f050036;
+        public static final int serverlist=0x7f050032;
         public static final int showCustom=0x7f050008;
         public static final int showHome=0x7f050005;
         public static final int showTitle=0x7f050007;
@@ -991,8 +997,11 @@ containing a value of this type.
         public static final int abs__search_view=0x7f030013;
         public static final int abs__simple_dropdown_hint=0x7f030014;
         public static final int activity_main=0x7f030015;
-        public static final int sherlock_spinner_dropdown_item=0x7f030016;
-        public static final int sherlock_spinner_item=0x7f030017;
+        public static final int activity_serverlist=0x7f030016;
+        public static final int add_alert_dialog=0x7f030017;
+        public static final int serverlistitem=0x7f030018;
+        public static final int sherlock_spinner_dropdown_item=0x7f030019;
+        public static final int sherlock_spinner_item=0x7f03001a;
     }
     public static final class menu {
         public static final int main=0x7f0c0000;
@@ -1039,11 +1048,17 @@ containing a value of this type.
          */
         public static final int abs__shareactionprovider_share_with_application=0x7f0a0007;
         public static final int addconfig=0x7f0a0013;
+        public static final int addipstrhint=0x7f0a0018;
+        public static final int addnewserverconfig=0x7f0a001a;
+        public static final int addporthint=0x7f0a0019;
         public static final int app_name=0x7f0a000d;
-        public static final int cfglist=0x7f0a0012;
+        public static final int cancel=0x7f0a001c;
         public static final int editscreenname=0x7f0a0015;
+        public static final int hello_world=0x7f0a0017;
         public static final int ip=0x7f0a0016;
+        public static final int ok=0x7f0a001b;
         public static final int screenname=0x7f0a0014;
+        public static final int serverlist=0x7f0a0012;
         public static final int start=0x7f0a0010;
         public static final int startusynergy=0x7f0a000f;
         public static final int stop=0x7f0a0011;

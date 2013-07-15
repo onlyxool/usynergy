@@ -21,10 +21,16 @@
 	        android:title="@string/screenname"
 	        android:summary="@string/editscreenname"/>
 	</PreferenceCategory>
-	<PreferenceCategory android:title="@string/cfglist">
+	<PreferenceCategory android:title="@string/serverlist">
 	    <PreferenceScreen
-	        android:key="@string/cfglist"
-	        android:title="@string/cfglist"
-	        android:summary="@string/cfglist"/>
+	        android:key="@string/serverlist"
+	        android:title="@string/serverlist"
+	        android:summary="@string/serverlist"/>
+	</PreferenceCategory>
+	<PreferenceCategory android:title="@string/about">
+	    <PreferenceScreen
+	        android:key="@string/about"
+	        android:title="@string/about"
+	        android:summary="@string/about"/>
 	</PreferenceCategory>
 </PreferenceScreen>

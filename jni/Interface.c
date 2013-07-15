@@ -12,6 +12,14 @@ jint java_io_brotherhood_usynergy_MainActivity_init(JNIEnv *env, jobject thiz,js
 {
 	uSynergyInit(&uSynergyLinuxContext, screenName, hight, width);
 }
+/**
+ * getclipBoard Text
+ * jstring clipboard Text
+ */
+jstring java_io_brotherhood_usynergy_MainActivity_getClipBoardText(JNIEnv *env,jobject thiz){
+
+//	return null;
+}
 
 /*
  * start()
