@@ -37,6 +37,9 @@ include $(CLEAR_VARS)
 LOCAL_MODULE := usynercore
 LOCAL_STATIC_LIBRARIES := libmicro
 LOCAL_SRC_FILES := Interface.c
+
+LOCAL_LDLIBS += -L$(SYSROOT)/usr/lib -llog
+
 include $(BUILD_SHARED_LIBRARY)
 
 #include $(CLEAR_VARS)

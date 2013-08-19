@@ -1,7 +1,9 @@
 package io.brotherhood.usynergy;
 
 import io.brotherhood.usynergy.bean.Screen;
+import io.brotherhood.usynergy.service.UsynergyService;
 import io.brotherhood.usynergy.util.PhoneUtils;
+import android.content.ComponentName;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
@@ -19,8 +21,8 @@ public class MainActivity extends SherlockPreferenceActivity {
 
 	private final String tag = "MainActivity";
 	private SharedPreferences sharePre = null;
-	private final String KEY_WIDTH = "width";
-	private final String KEY_HEIGHT = "height";
+	public static final String KEY_WIDTH = "width";
+	public static final String KEY_HEIGHT = "height";
 	private int width = 0;
 	private int height = 0;
 
@@ -39,8 +41,8 @@ public class MainActivity extends SherlockPreferenceActivity {
 			editor.putInt(KEY_HEIGHT, s.height);
 			editor.commit();
 		}
-		Log.i(tag, sharePre.getString("Screen Name", "xxx"));
-		Log.i(tag, sharePre.getBoolean("start", false)+"");
+//		Log.i(tag, sharePre.getString("Screen Name", "xxx"));
+//		Log.i(tag, sharePre.getBoolean("start", false)+"");
 	}
 
 	@Override
@@ -72,7 +74,10 @@ public class MainActivity extends SherlockPreferenceActivity {
 			return false;
 		Log.i(tag , key);
 		if(key.equals(getString(R.string.start))){
-			
+			ComponentName service = startService(new Intent(this,UsynergyService.class));
+	        if (service == null) {
+	            Log.e(tag, "Can't start service " + UsynergyService.class.getName());
+	        }
 		}else if(key.equals(getString(R.string.serverlist))){
 			Intent intent = new Intent(this, ServerlistActivity.class);
 			intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
@@ -81,14 +86,5 @@ public class MainActivity extends SherlockPreferenceActivity {
 		return super.onPreferenceTreeClick(preferenceScreen, preference);
 	}
 
-	public native void init(String screenName,int hight,int width);
-	public native void start();
-	public native void shutdown();
-	public native void setClientName(String clientName);
-	public native void exit();
-	public native String getClipBoardText();
 
-	static{
-		System.loadLibrary("usynercore");
-	}
 }

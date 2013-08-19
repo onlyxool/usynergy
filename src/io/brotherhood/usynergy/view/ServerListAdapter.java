@@ -7,6 +7,7 @@ import java.util.List;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -24,12 +25,15 @@ public class ServerListAdapter extends BaseAdapter {
 	private List<ServerEntity> list = null;
 	private int temp = -1;
 	private MyOnCheckedChangeListener listener = null;
+	private final String SELECT = "Select";
+	private SharedPreferences sharePre = null;
 
-	public ServerListAdapter(Activity mContext, List<ServerEntity> mData,int checked) {
+	public ServerListAdapter(Activity mContext, List<ServerEntity> mData,SharedPreferences sharePre) {
 		this.mContext = mContext;
 		list = mData;
 		listener = new MyOnCheckedChangeListener();
-		this.temp = checked;
+		this.temp = sharePre.getInt(SELECT, -1);
+		this.sharePre = sharePre;
 	}
 
 	@Override
@@ -68,6 +72,7 @@ public class ServerListAdapter extends BaseAdapter {
 		holder.ipandport.setText(obj.ipadd + " : " + obj.port);
 		holder.select.setOnCheckedChangeListener(listener);
 		holder.select.setId(holder.select.getId()+position);
+		Log.e(TAG, "position="+position+"#temp="+temp);
 		if(temp == position){
 			holder.select.setChecked(true);
         }
@@ -77,7 +82,7 @@ public class ServerListAdapter extends BaseAdapter {
 	private class MyOnCheckedChangeListener implements OnCheckedChangeListener{
 		@Override
 		public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-			Log.i(TAG, buttonView.getId()+" temp="+temp);
+			Log.e(TAG, buttonView.getId()+" temp="+temp+"#"+isChecked);
 			if (isChecked) {
 				if (temp != -1) {
 					RadioButton tempButton = (RadioButton) mContext.findViewById(temp);
@@ -86,10 +91,12 @@ public class ServerListAdapter extends BaseAdapter {
 					}
 				}
 				temp = buttonView.getId();
-				
+				SharedPreferences.Editor editor1 = sharePre.edit();
+				editor1.putInt(SELECT,temp);
+				editor1.commit();
+				Log.e(TAG, " temp="+temp);
 			}else{
 				buttonView.setChecked(false);
-				
 			}
 		}
 	}
