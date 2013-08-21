@@ -14,13 +14,13 @@ public class DBHelper extends SQLiteOpenHelper {
 
 	@Override
 	public void onCreate(SQLiteDatabase db) {
-		db.execSQL("create table "+serverlist+"(id integer primary key autoincrement,ipadd varchar(20)," +
-				"port varchar(5));");
+		db.execSQL("create table " + serverlist + "(id integer primary key autoincrement,ipadd varchar(20),"
+				+ "port varchar(5));");
 	}
 
 	@Override
 	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-		db.execSQL("DROP TABLE IF EXISTS "+ serverlist);
+		db.execSQL("DROP TABLE IF EXISTS " + serverlist);
 		onCreate(db);
 	}
 }

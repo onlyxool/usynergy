@@ -28,7 +28,7 @@ public class ServerListAdapter extends BaseAdapter {
 	private final String SELECT = "Select";
 	private SharedPreferences sharePre = null;
 
-	public ServerListAdapter(Activity mContext, List<ServerEntity> mData,SharedPreferences sharePre) {
+	public ServerListAdapter(Activity mContext, List<ServerEntity> mData, SharedPreferences sharePre) {
 		this.mContext = mContext;
 		list = mData;
 		this.selectId = sharePre.getInt(SELECT, -1);
@@ -49,8 +49,8 @@ public class ServerListAdapter extends BaseAdapter {
 	public long getItemId(int position) {
 		return list.get(position).id;
 	}
-	
-	public void setList(List<ServerEntity> list){
+
+	public void setList(List<ServerEntity> list) {
 		this.list = list;
 	}
 
@@ -70,24 +70,24 @@ public class ServerListAdapter extends BaseAdapter {
 		holder.ipandport.setText(obj.ipadd + " : " + obj.port);
 		MyOnCheckedChangeListener listener = new MyOnCheckedChangeListener(obj.id);
 		holder.select.setOnCheckedChangeListener(listener);
-		holder.select.setId(holder.select.getId()+position);//TODO
-		Log.e(TAG, "id="+obj.id+"#position="+position+"#temp="+temp);
-		if(selectId == obj.id){
+		holder.select.setId(holder.select.getId() + position);// TODO
+		Log.e(TAG, "id=" + obj.id + "#position=" + position + "#temp=" + temp);
+		if (selectId == obj.id) {
 			holder.select.setChecked(true);
-        }
+		}
 		return convertView;
 	}
 
-	private class MyOnCheckedChangeListener implements OnCheckedChangeListener{
+	private class MyOnCheckedChangeListener implements OnCheckedChangeListener {
 		private int id = -1;
 
-		public MyOnCheckedChangeListener(int id){
+		public MyOnCheckedChangeListener(int id) {
 			this.id = id;
 		}
 
 		@Override
 		public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-			Log.e(TAG, buttonView.getId()+" temp="+temp+"#"+isChecked);
+			Log.e(TAG, buttonView.getId() + " temp=" + temp + "#" + isChecked);
 			if (isChecked) {
 				if (temp != -1) {
 					RadioButton tempButton = (RadioButton) mContext.findViewById(temp);
@@ -97,10 +97,10 @@ public class ServerListAdapter extends BaseAdapter {
 				}
 				temp = buttonView.getId();
 				SharedPreferences.Editor editor1 = sharePre.edit();
-				editor1.putInt(SELECT,id);
+				editor1.putInt(SELECT, id);
 				editor1.commit();
-				Log.e(TAG, " temp="+temp);
-			}else{
+				Log.e(TAG, " temp=" + temp);
+			} else {
 				buttonView.setChecked(false);
 			}
 		}

@@ -35,7 +35,7 @@ public class MainActivity extends SherlockPreferenceActivity {
 		sharePre = PreferenceManager.getDefaultSharedPreferences(this);
 		width = sharePre.getInt(KEY_WIDTH, 0);
 		height = sharePre.getInt(KEY_HEIGHT, 0);
-		if(width==0||height==0){
+		if (width == 0 || height == 0) {
 			Screen s = PhoneUtils.getResolution(this);
 			Editor editor = sharePre.edit();
 			editor.putInt(KEY_WIDTH, s.width);
@@ -43,9 +43,9 @@ public class MainActivity extends SherlockPreferenceActivity {
 			editor.commit();
 		}
 		boolean haveRoot = RootCmd.rootCmd("ls");
-//		Log.i(tag, sharePre.getString("Screen Name", "xxx"));
-//		Log.i(tag, sharePre.getBoolean("start", false)+"");
-		Log.i(tag, haveRoot+"");
+		// Log.i(tag, sharePre.getString("Screen Name", "xxx"));
+		// Log.i(tag, sharePre.getBoolean("start", false)+"");
+		Log.i(tag, haveRoot + "");
 	}
 
 	@Override
@@ -64,30 +64,27 @@ public class MainActivity extends SherlockPreferenceActivity {
 		}
 		return super.onOptionsItemSelected(item);
 	}
-	
+
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
-
 		return super.onCreateOptionsMenu(menu);
 	}
 
 	public boolean onPreferenceTreeClick(PreferenceScreen preferenceScreen, Preference preference) {
 		String key = preference.getKey();
-		if(key==null)
+		if (key == null)
 			return false;
-		Log.i(tag , key);
-		if(key.equals(getString(R.string.start))){
-			ComponentName service = startService(new Intent(this,UsynergyService.class));
-	        if (service == null) {
-	            Log.e(tag, "Can't start service " + UsynergyService.class.getName());
-	        }
-		}else if(key.equals(getString(R.string.serverlist))){
+		Log.i(tag, key);
+		if (key.equals(getString(R.string.start))) {
+			ComponentName service = startService(new Intent(this, UsynergyService.class));
+			if (service == null) {
+				Log.e(tag, "Can't start service " + UsynergyService.class.getName());
+			}
+		} else if (key.equals(getString(R.string.serverlist))) {
 			Intent intent = new Intent(this, ServerlistActivity.class);
 			intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 			startActivity(intent);
 		}
 		return super.onPreferenceTreeClick(preferenceScreen, preference);
 	}
-
-
 }

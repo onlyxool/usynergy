@@ -4,7 +4,8 @@ import android.app.Application;
 
 public class App extends Application {
 	private static App instance;
-//	private static final String TAG = "APP";
+
+	// private static final String TAG = "APP";
 
 	public static App getInstance() {
 		return instance;
@@ -14,6 +15,5 @@ public class App extends Application {
 	public void onCreate() {
 		instance = this;
 	}
-
 
 }

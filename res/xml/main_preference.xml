@@ -1,36 +1,40 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
-	<PreferenceCategory android:title="@string/startusynergy">
-		<CheckBoxPreference 
-			android:key="@string/start" 
-			android:title="@string/startusynergy" 
-			android:summaryOn="@string/start" 
-			android:summaryOff="@string/stop" 
-			android:defaultValue="false"/>
-		<!-- <ListPreference
+
+	<PreferenceCategory android:title="@string/startusynergy" >
+		<CheckBoxPreference
+			android:defaultValue="false"
+			android:key="@string/start"
+			android:summaryOff="@string/stop"
+			android:summaryOn="@string/start"
+			android:title="@string/startusynergy" />
+		<!--
+			 <ListPreference
 			android:key="list_config"
 			android:title="@string/listconfig"
 			android:summary="@string/listconfig"
 			android:entries="@array/entries_list_preference"
 			android:entryValues="@array/entryvalues_list_preference"
-			android:dialogTitle="@string/dialog_title_list_preference" /> -->
+			android:dialogTitle="@string/dialog_title_list_preference" />
+		-->
 	</PreferenceCategory>
-	<PreferenceCategory android:title="@string/screenname">
-	    <EditTextPreference 
-	        android:key="@string/screenname"
-	        android:title="@string/screenname"
-	        android:summary="@string/editscreenname"/>
+	<PreferenceCategory android:title="@string/screenname" >
+		<EditTextPreference
+			android:key="@string/screenname"
+			android:summary="@string/editscreenname"
+			android:title="@string/screenname" />
 	</PreferenceCategory>
-	<PreferenceCategory android:title="@string/serverlist">
-	    <PreferenceScreen
-	        android:key="@string/serverlist"
-	        android:title="@string/serverlist"
-	        android:summary="@string/serverlist"/>
+	<PreferenceCategory android:title="@string/serverlist" >
+		<PreferenceScreen
+			android:key="@string/serverlist"
+			android:summary="@string/serverlist"
+			android:title="@string/serverlist" />
 	</PreferenceCategory>
-	<PreferenceCategory android:title="@string/about">
-	    <PreferenceScreen
-	        android:key="@string/about"
-	        android:title="@string/about"
-	        android:summary="@string/about"/>
+	<PreferenceCategory android:title="@string/about" >
+		<PreferenceScreen
+			android:key="@string/about"
+			android:summary="@string/about"
+			android:title="@string/about" />
 	</PreferenceCategory>
+
 </PreferenceScreen>

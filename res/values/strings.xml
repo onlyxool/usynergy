@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">uSynergy</string>
-    <string name="about">about</string>
-    <string name="startusynergy">启动uSynergy</string>
-    <string name="start">start</string>
-    <string name="stop">stop</string>
-    <string name="serverlist">server list</string>
-    <string name="addconfig">add new config</string>
-    <string name="screenname">Screen Name</string>
-    <string name="editscreenname">edit screen name</string>
-    <string name="ip">ip</string>
-    <string name="hello_world">Hello world!</string>
+	<string name="app_name">uSynergy</string>
+	<string name="about">about</string>
+	<string name="startusynergy">启动uSynergy</string>
+	<string name="start">start</string>
+	<string name="stop">stop</string>
+	<string name="serverlist">server list</string>
+	<string name="addconfig">add new config</string>
+	<string name="screenname">Screen Name</string>
+	<string name="editscreenname">edit screen name</string>
+	<string name="ip">ip</string>
+	<string name="hello_world">Hello world!</string>
 	<string name="addipstrhint">Input server ip address</string>
 	<string name="addporthint">Input server port</string>
 	<string name="addnewserverconfig">Add new server config</string>
