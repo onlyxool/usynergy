@@ -12,6 +12,8 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.util.Log;
+import android.view.ContextMenu;
+import android.view.ContextMenu.ContextMenuInfo;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnCreateContextMenuListener;
@@ -23,7 +25,6 @@ import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
 
 public class ServerlistActivity extends SherlockActivity implements OnCreateContextMenuListener {
-
 	private static final String tag = "ServerlistActivity";
 	private final String MENU_ADD = "add";
 	private ListView serverlistView = null;
@@ -31,7 +32,7 @@ public class ServerlistActivity extends SherlockActivity implements OnCreateCont
 	private ServerListDao dao = null;
 	private ServerListAdapter adapter = null;
 	private SharedPreferences sharePre = null;
-	private final String CHECKED = "checked";
+//	private final String CHECKED = "checked";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,13 +40,12 @@ public class ServerlistActivity extends SherlockActivity implements OnCreateCont
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_serverlist);
 		sharePre = PreferenceManager.getDefaultSharedPreferences(this);
-		
 
         dao = new ServerListDao();
         serverList = dao.getList();
 
         adapter = new ServerListAdapter(this,serverList,sharePre);
-        
+
         serverlistView = (ListView)findViewById(R.id.serverlist);
         serverlistView.setAdapter(adapter);
         serverlistView.setOnCreateContextMenuListener(this);
@@ -57,6 +57,12 @@ public class ServerlistActivity extends SherlockActivity implements OnCreateCont
         return super.onCreateOptionsMenu(menu);
     }
 
+    @Override
+	public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
+		getMenuInflater().inflate(R.menu.main, menu);
+		super.onCreateContextMenu(menu, v, menuInfo);
+	}
+
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		Log.i(tag, item.getItemId()+"#"+item.getTitle());
@@ -66,6 +72,12 @@ public class ServerlistActivity extends SherlockActivity implements OnCreateCont
 			break;
 		case 0:
 			showAddAndEditDialog(null);
+			break;
+		case R.id.edit:
+//			toEdit(position);
+			break;
+		case R.id.del:
+//			toDel(position);
 			break;
 		default:
 			break;
@@ -115,4 +127,5 @@ public class ServerlistActivity extends SherlockActivity implements OnCreateCont
 		adapter.setList(serverList);
 		adapter.notifyDataSetChanged();
 	}
+
 }

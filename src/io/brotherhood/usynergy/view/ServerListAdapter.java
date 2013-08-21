@@ -24,15 +24,14 @@ public class ServerListAdapter extends BaseAdapter {
 	private ViewHolder holder;
 	private List<ServerEntity> list = null;
 	private int temp = -1;
-	private MyOnCheckedChangeListener listener = null;
+	private int selectId = -1;
 	private final String SELECT = "Select";
 	private SharedPreferences sharePre = null;
 
 	public ServerListAdapter(Activity mContext, List<ServerEntity> mData,SharedPreferences sharePre) {
 		this.mContext = mContext;
 		list = mData;
-		listener = new MyOnCheckedChangeListener();
-		this.temp = sharePre.getInt(SELECT, -1);
+		this.selectId = sharePre.getInt(SELECT, -1);
 		this.sharePre = sharePre;
 	}
 
@@ -64,22 +63,28 @@ public class ServerListAdapter extends BaseAdapter {
 			convertView = inflater.inflate(R.layout.serverlistitem, null);
 			holder.ipandport = (TextView) convertView.findViewById(R.id.ipandport);
 			holder.select = (RadioButton) convertView.findViewById(R.id.select);
-			
 			convertView.setTag(holder);
 		} else {
 			holder = (ViewHolder) convertView.getTag();
 		}
 		holder.ipandport.setText(obj.ipadd + " : " + obj.port);
+		MyOnCheckedChangeListener listener = new MyOnCheckedChangeListener(obj.id);
 		holder.select.setOnCheckedChangeListener(listener);
-		holder.select.setId(holder.select.getId()+position);
-		Log.e(TAG, "position="+position+"#temp="+temp);
-		if(temp == position){
+		holder.select.setId(holder.select.getId()+position);//TODO
+		Log.e(TAG, "id="+obj.id+"#position="+position+"#temp="+temp);
+		if(selectId == obj.id){
 			holder.select.setChecked(true);
         }
 		return convertView;
 	}
 
 	private class MyOnCheckedChangeListener implements OnCheckedChangeListener{
+		private int id = -1;
+
+		public MyOnCheckedChangeListener(int id){
+			this.id = id;
+		}
+
 		@Override
 		public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
 			Log.e(TAG, buttonView.getId()+" temp="+temp+"#"+isChecked);
@@ -92,7 +97,7 @@ public class ServerListAdapter extends BaseAdapter {
 				}
 				temp = buttonView.getId();
 				SharedPreferences.Editor editor1 = sharePre.edit();
-				editor1.putInt(SELECT,temp);
+				editor1.putInt(SELECT,id);
 				editor1.commit();
 				Log.e(TAG, " temp="+temp);
 			}else{

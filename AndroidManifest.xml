@@ -14,10 +14,8 @@
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
-        <activity
-            android:name="io.brotherhood.usynergy.MainActivity"
-            android:label="@string/app_name"
-            android:theme="@style/Theme.Sherlock" >
+        <activity android:name="io.brotherhood.usynergy.MainActivity"
+            android:label="@string/app_name" android:theme="@style/Theme.Sherlock" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -27,7 +25,8 @@
 
         <service android:name="io.brotherhood.usynergy.service.UsynergyService" />
 
-        <activity android:name="io.brotherhood.usynergy.ServerlistActivity" />
+        <activity android:name="io.brotherhood.usynergy.ServerlistActivity"  
+             android:theme="@style/Theme.Sherlock"/>
     </application>
 
 </manifest>

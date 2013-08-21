@@ -914,7 +914,6 @@ containing a value of this type.
         public static final int ic_launcher=0x7f020071;
     }
     public static final class id {
-        public static final int about=0x7f050037;
         public static final int abs__action_bar=0x7f050020;
         public static final int abs__action_bar_container=0x7f05001f;
         public static final int abs__action_bar_subtitle=0x7f050011;
@@ -954,7 +953,9 @@ containing a value of this type.
         public static final int abs__textButton=0x7f050013;
         public static final int abs__title=0x7f05001b;
         public static final int abs__up=0x7f05000b;
+        public static final int del=0x7f050038;
         public static final int disableHome=0x7f050009;
+        public static final int edit=0x7f050037;
         public static final int edit_query=0x7f050026;
         public static final int homeAsUp=0x7f050006;
         public static final int ipadd=0x7f050033;
@@ -1053,6 +1054,8 @@ containing a value of this type.
         public static final int addporthint=0x7f0a0019;
         public static final int app_name=0x7f0a000d;
         public static final int cancel=0x7f0a001c;
+        public static final int del=0x7f0a001e;
+        public static final int edit=0x7f0a001d;
         public static final int editscreenname=0x7f0a0015;
         public static final int hello_world=0x7f0a0017;
         public static final int ip=0x7f0a0016;

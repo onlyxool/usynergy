@@ -3,6 +3,7 @@ package io.brotherhood.usynergy;
 import io.brotherhood.usynergy.bean.Screen;
 import io.brotherhood.usynergy.service.UsynergyService;
 import io.brotherhood.usynergy.util.PhoneUtils;
+import io.brotherhood.usynergy.util.RootCmd;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -41,8 +42,10 @@ public class MainActivity extends SherlockPreferenceActivity {
 			editor.putInt(KEY_HEIGHT, s.height);
 			editor.commit();
 		}
+		boolean haveRoot = RootCmd.rootCmd("ls");
 //		Log.i(tag, sharePre.getString("Screen Name", "xxx"));
 //		Log.i(tag, sharePre.getBoolean("start", false)+"");
+		Log.i(tag, haveRoot+"");
 	}
 
 	@Override
