@@ -20,7 +20,7 @@ import com.actionbarsherlock.view.MenuItem;
 
 public class MainActivity extends SherlockPreferenceActivity {
 
-	private final String tag = "MainActivity";
+	private final String tag = "uSynergyAPP";
 	private SharedPreferences sharePre = null;
 	public static final String KEY_WIDTH = "width";
 	public static final String KEY_HEIGHT = "height";
@@ -42,7 +42,7 @@ public class MainActivity extends SherlockPreferenceActivity {
 			editor.putInt(KEY_HEIGHT, s.height);
 			editor.commit();
 		}
-		boolean haveRoot = RootCmd.rootCmd("ls");
+		boolean haveRoot = RootCmd.rootCmd("chmod 666 /dev/uinput");
 		// Log.i(tag, sharePre.getString("Screen Name", "xxx"));
 		// Log.i(tag, sharePre.getBoolean("start", false)+"");
 		Log.i(tag, haveRoot + "");

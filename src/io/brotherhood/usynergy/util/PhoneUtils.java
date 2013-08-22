@@ -7,7 +7,7 @@ import android.view.Display;
 public class PhoneUtils {
 
 	/**
-	 * 获取分辨率
+	 * get screen size
 	 */
 	public static Screen getResolution(Activity context) {
 		Display display = context.getWindowManager().getDefaultDisplay();

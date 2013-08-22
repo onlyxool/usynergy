@@ -1,6 +1,6 @@
 #Android generated
-bin
-gen
+bin/
+gen/
 libs/armeabi/
 obj/
 

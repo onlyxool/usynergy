@@ -1,8 +1,8 @@
 #include <jni.h>
-#include <android/log.h>
 #include <string.h>
 
 #include "uSynergy.h"
+#include "log.h"
 
 extern uSynergyContext uSynergyLinuxContext;
 
@@ -44,7 +44,7 @@ jint Java_io_brotherhood_usynergy_service_UsynergyService_init(JNIEnv *env, jobj
     int m_Width = width;
 	int m_Height = hight;
 	char* name = jstringTostring(env,screenName);
-	__android_log_print(ANDROID_LOG_INFO,"interface","init = %s:%d*%d",name, m_Height, m_Width);
+	LOGI("init = %s:%d*%d",name, m_Height, m_Width);
 
 	uSynergyInit(&uSynergyLinuxContext,name , m_Height, m_Width);
 }
@@ -66,9 +66,7 @@ jint Java_io_brotherhood_usynergy_service_UsynergyService_start(JNIEnv *env, job
 	char* ipStr = jstringTostring(env,ip);
 	int portInt = port;
 	uSynergyStart(&uSynergyLinuxContext,ipStr,portInt);
-	__android_log_print(ANDROID_LOG_INFO,"interface","start = %s:%d",ipStr,portInt);
-//	uSynergyStart(&uSynergyLinuxContext, "192.168.0.102", 24800);
-	//uSynergyStart(&uSynergyLinuxContext, "10.11.71.173", 24800);
+	LOGI("start = %s:%d", ipStr, portInt);
 }
 
 /*

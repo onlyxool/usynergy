@@ -73,6 +73,9 @@ static uSynergyBool uSynergyConnectDevice(uSynergyCookie cookie)
 	cookie->uinput_mouse = suinput_open("usynergy-mouse", &(cookie->device_id),
 		mouse);
 
+	if (cookie->uinput_mouse < 0 || cookie->uinput_keyboard < 0)
+		return USYNERGY_FALSE;
+
 	return USYNERGY_TRUE;
 }
 
@@ -154,6 +157,12 @@ static void uSynergySleepFunc(uSynergyCookie cookie, int timeMs)
 	msleep(timeMs);
 }
 
+static void uSynergyClipboard(uSynergyCookie cookie,
+	enum uSynergyClipboardFormat format, const uint8_t *data, uint32_t size)
+{
+
+}
+
 uSynergyContext uSynergyLinuxContext = {
 	.m_updateServerAddr	= uSynergyUpdateServer,
 	.m_connectFunc      = uSynergyConnectFunc,
@@ -171,5 +180,5 @@ uSynergyContext uSynergyLinuxContext = {
 	.m_sleepFunc        = uSynergySleepFunc,
 	.m_traceFunc		= NULL,
 	.m_joystickCallback = NULL,
-	.m_clipboardCallback= NULL,
+	.m_clipboardCallback= uSynergyClipboard,
 };
