@@ -3,12 +3,12 @@
 #include "platform.h"
 #include "suinput.h"
 
-static void uSynergyUpdateServer(uSynergyCookie cookie, char *addr, int port)
+static void uSynergyUpdateServer(uSynergyCookie cookie)
 {
 	memset(&(cookie->server_addr), 0, sizeof(struct sockaddr));
 	cookie->server_addr.sin_family = AF_INET;
-	cookie->server_addr.sin_port = htons(port);
-	cookie->server_addr.sin_addr.s_addr = inet_addr(addr);
+	cookie->server_addr.sin_port = htons(cookie->port);
+	cookie->server_addr.sin_addr.s_addr = inet_addr(cookie->ipAddr);
 }
 
 static uSynergyBool uSynergyConnectFunc(uSynergyCookie cookie)

@@ -63,10 +63,14 @@ jstring Java_io_brotherhood_usynergy_service_UsynergyService_getClipBoardText(JN
  */
 jint Java_io_brotherhood_usynergy_service_UsynergyService_start(JNIEnv *env, jobject thiz,jstring ip,jint port)
 {
-	char* ipStr = jstringTostring(env,ip);
-	int portInt = port;
-	uSynergyStart(&uSynergyLinuxContext,ipStr,portInt);
-	LOGI("start = %s:%d", ipStr, portInt);
+	char* ipStr;
+	ipStr = malloc(strlen(jstringTostring(env,ip)) + 1);
+
+	uSynergyLinuxContext.m_cookie->ipAddr = strcpy(ipStr, jstringTostring(env,ip));
+	uSynergyLinuxContext.m_cookie->port = port;
+
+	uSynergyStart(&uSynergyLinuxContext);
+	LOGI("start = %s:%d", ipStr, port);
 }
 
 /*

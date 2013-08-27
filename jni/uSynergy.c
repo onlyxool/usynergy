@@ -29,6 +29,7 @@
 
 #include "uSynergy.h"
 #include "keymap.h"
+#include "log.h"
 
 //-----------------------------------------------------------------------------
 //	Internal helpers
@@ -467,7 +468,6 @@ static void sProcessMessage(uSynergyContext *context, const uint8_t *message)
 			synergy server.\n", context->m_clientName);
 		sTrace(context, buffer);
 		sSetDisconnected(context);
-		context->m_ongoing = USYNERGY_FALSE;
 		return;
 	} else {
 		/* Unknown packet, could be any of these
@@ -630,7 +630,6 @@ void uSynergyInit(uSynergyContext *context, char *ClientName,
 	cookie = malloc(sizeof(CookieType));
 	memset(cookie, 0, sizeof(CookieType));
 	context->m_cookie = cookie;
-	context->m_ongoing = USYNERGY_TRUE;
 
 	/* Initialize to default state */
 	tempStr = malloc(strlen(ClientName) + 1);
@@ -648,6 +647,12 @@ void uSynergyInit(uSynergyContext *context, char *ClientName,
  */
 void uSynergyUpdate(uSynergyContext *context)
 {
+	/* Try to connect */
+	if (context->m_connectFunc(context->m_cookie) &&
+		context->m_connectDevice(context->m_cookie)) {
+			context->m_connected = USYNERGY_TRUE;
+	}
+
 	if (context->m_connected) {
 		/* Update context, receive data, call callbacks */
 		pthread_mutexattr_t attr;
@@ -655,12 +660,6 @@ void uSynergyUpdate(uSynergyContext *context)
 		pthread_mutex_init(&context->m_receiveMutex, &attr);
 		sUpdateContext(context);
 		pthread_mutex_destroy(&context->m_receiveMutex);
-	} else {
-		/* Try to connect */
-		if (context->m_connectFunc(context->m_cookie)) {
-			context->m_connected = USYNERGY_TRUE;
-			context->m_connectDevice(context->m_cookie);
-		}
 	}
 }
 
@@ -706,20 +705,15 @@ void uSynergySendClipboard(uSynergyContext *context, const char *text)
 	sSendReply(context);
 }
 
-void uSynergyStart(uSynergyContext *context, char *addr, int port)
+int uSynergyStart(uSynergyContext *context)
 {
-	int i;
-	context->m_updateServerAddr(context->m_cookie, addr, port);
-
-	for(i = 0; context->m_ongoing == USYNERGY_TRUE && i < 10; i++) {
-		uSynergyUpdate(context);
-	}
+	context->m_updateServerAddr(context->m_cookie);
+	uSynergyUpdate(context);
 }
 
 void uSynergyStop(uSynergyContext *context)
 {
 	sSetDisconnected(context);
-	context->m_ongoing == USYNERGY_FALSE;
 }
 
 void uSynergCleanUP(uSynergyContext *context)

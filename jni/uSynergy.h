@@ -80,9 +80,16 @@ typedef int uSynergyBool;
  *  functions as context.
  */
 typedef struct {
+	// server info
 	int sockfd;
 	struct sockaddr_in server_addr;
+	char* ipAddr;
+	int port;
+
+	// host info
 	char *device_name;
+
+	// Devices info
 	struct input_id device_id;
 	int uinput_keyboard;
 	int uinput_mouse;
@@ -154,7 +161,7 @@ typedef struct {
 	/* Connect function */
 	uSynergyBool (*m_connectFunc)(uSynergyCookie cookie);
 
-	void (*m_updateServerAddr)(uSynergyCookie cookie, char *addr, int port);
+	void (*m_updateServerAddr)(uSynergyCookie cookie);
 
 	/* Send data function */
 	uSynergyBool (*m_sendFunc)(uSynergyCookie cookie, const uint8_t *buffer,
@@ -229,8 +236,6 @@ typedef struct {
 
 	/* Have we received a 'Hello' from the server? */
 	uSynergyBool m_hasReceivedHello;
-
-	uSynergyBool m_ongoing;
 
 	/* Is Synergy active (i.e. this client is receiving input messages?) */
 	uSynergyBool m_isCaptured;
@@ -337,7 +342,7 @@ extern void uSynergyUpdate(uSynergyContext *context);
  */
 extern void uSynergySendClipboard(uSynergyContext *context, const char *text);
 
-extern void uSynergyStart(uSynergyContext *context, char *addr, int port);
+extern int uSynergyStart(uSynergyContext *context);
 
 extern void uSynergyStop(uSynergyContext *context);
 
