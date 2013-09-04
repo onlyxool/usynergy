@@ -2,7 +2,8 @@
 <resources>
 	<string name="app_name">uSynergy</string>
 	<string name="about">about</string>
-	<string name="startusynergy">启动uSynergy</string>
+	<string name="aboutmsg">\n\nAny suggestion please contact to us:onlyxool@gmail.com and coolmite@gmail.com.\n\nMore detail:https://github.com/onlyxool/usynergy\n\n</string>
+	<string name="startusynergy">Start uSynergy</string>
 	<string name="start">start</string>
 	<string name="stop">stop</string>
 	<string name="serverlist">server list</string>
@@ -14,6 +15,8 @@
 	<string name="addipstrhint">Input server ip address</string>
 	<string name="addporthint">Input server port</string>
 	<string name="addnewserverconfig">Add new server config</string>
+	<string name="editserverconfig">Edit server config</string>
+	<string name="noserverconfig">you don\'t have any server config</string>
 	<string name="ok">OK</string>
 	<string name="cancel">Cancel</string>
 	<string name="edit">edit</string>

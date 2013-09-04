@@ -23,9 +23,9 @@ public final class RootCmd {
 				}
 				process.destroy();
 			} catch (Exception e) {
+				e.printStackTrace();
 			}
 		}
 		return true;
 	}
-
 }

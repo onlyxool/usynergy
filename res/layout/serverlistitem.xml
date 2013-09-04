@@ -26,6 +26,9 @@
 		android:layout_centerVertical="true"
 		android:layout_marginBottom="10dp"
 		android:layout_marginRight="20dp"
-		android:layout_marginTop="10dp" />
+		android:layout_marginTop="10dp"
+		android:focusable="false"
+		android:clickable="false"
+		android:focusableInTouchMode="false"/>
 
 </RelativeLayout>

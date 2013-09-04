@@ -15,7 +15,7 @@ public class DBHelper extends SQLiteOpenHelper {
 	@Override
 	public void onCreate(SQLiteDatabase db) {
 		db.execSQL("create table " + serverlist + "(id integer primary key autoincrement,ipadd varchar(20),"
-				+ "port varchar(5));");
+				+ "port varchar(5),checked integer);");
 	}
 
 	@Override

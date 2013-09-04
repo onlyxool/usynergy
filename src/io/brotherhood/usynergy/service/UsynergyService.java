@@ -1,24 +1,50 @@
 package io.brotherhood.usynergy.service;
 
 import io.brotherhood.usynergy.MainActivity;
+import io.brotherhood.usynergy.R;
+import io.brotherhood.usynergy.bean.ServerEntity;
+import io.brotherhood.usynergy.db.ServerListDao;
 import android.app.Service;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
+import android.widget.Toast;
 
 public class UsynergyService extends Service {
 	private SharedPreferences sharePre = null;
+	private ServerListDao dao = null;
+	private RunSynergyThread runSynergyThread = null;
+	private String screenName = null;
+	private int width = 0;
+	private int height = 0;
+	private ServerEntity obj = null;
 
 	@Override
 	public void onCreate() {
 		sharePre = PreferenceManager.getDefaultSharedPreferences(this);
-		String screenName = sharePre.getString("screenname", "android");
-		int width = sharePre.getInt(MainActivity.KEY_WIDTH, 0);
-		int height = sharePre.getInt(MainActivity.KEY_HEIGHT, 0);
-		init(screenName, height, width);
-		start("192.168.0.102", 24800);
+		String screenNameKey = getString(R.string.screenname);
+		screenName = sharePre.getString(screenNameKey, MainActivity.defualtScreenName);
+		width = sharePre.getInt(MainActivity.KEY_WIDTH, 0);
+		height = sharePre.getInt(MainActivity.KEY_HEIGHT, 0);
+		dao = new ServerListDao();
+		obj = dao.getSelectObj();
+
+		if (obj == null) {
+			Toast.makeText(this, R.string.noserverconfig, Toast.LENGTH_SHORT).show();
+			return;
+		}
+
+		runSynergyThread = new RunSynergyThread();
+		runSynergyThread.start();
 	}
+
+	class RunSynergyThread extends Thread {
+		public void run() {
+			init(screenName, height, width);
+			UsynergyService.this.start(obj.ipadd, Integer.parseInt(obj.port));
+		}
+	};
 
 	@Override
 	public void onDestroy() {
