@@ -9,9 +9,11 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
+import android.util.Log;
 import android.widget.Toast;
 
 public class UsynergyService extends Service {
+	private final String tag = "UsynergyService";
 	private SharedPreferences sharePre = null;
 	private ServerListDao dao = null;
 	private RunSynergyThread runSynergyThread = null;
@@ -42,7 +44,8 @@ public class UsynergyService extends Service {
 	class RunSynergyThread extends Thread {
 		public void run() {
 			init(screenName, height, width);
-			UsynergyService.this.start(obj.ipadd, Integer.parseInt(obj.port));
+			int result = UsynergyService.this.start(obj.ipadd, Integer.parseInt(obj.port));
+			Log.e(tag, "result=" + result);
 		}
 	};
 

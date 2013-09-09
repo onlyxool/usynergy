@@ -8,15 +8,6 @@
 			android:summaryOff="@string/stop"
 			android:summaryOn="@string/start"
 			android:title="@string/startusynergy" />
-		<!--
-			 <ListPreference
-			android:key="list_config"
-			android:title="@string/listconfig"
-			android:summary="@string/listconfig"
-			android:entries="@array/entries_list_preference"
-			android:entryValues="@array/entryvalues_list_preference"
-			android:dialogTitle="@string/dialog_title_list_preference" />
-		-->
 	</PreferenceCategory>
 	<PreferenceCategory android:title="@string/screenname" >
 		<EditTextPreference

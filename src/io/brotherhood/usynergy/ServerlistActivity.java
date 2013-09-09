@@ -106,6 +106,7 @@ public class ServerlistActivity extends SherlockActivity implements OnCreateCont
 			port.setText(obj.port);
 			builder.setTitle(R.string.editserverconfig);
 		} else {
+			port.setText(R.string.defualtport);
 			builder.setTitle(R.string.addnewserverconfig);
 		}
 		builder.setIconAttribute(R.drawable.ic_launcher).setView(textEntryView)

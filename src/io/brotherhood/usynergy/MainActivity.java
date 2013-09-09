@@ -8,7 +8,6 @@ import io.brotherhood.usynergy.util.PhoneUtils;
 import io.brotherhood.usynergy.util.RootCmd;
 import android.app.AlertDialog;
 import android.content.ComponentName;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
@@ -104,6 +103,10 @@ public class MainActivity extends SherlockPreferenceActivity implements OnShared
 			return false;
 		Log.i(tag, key);
 		if (key.equals(getString(R.string.start))) {
+			Boolean startOption = sharePre.getBoolean(getString(R.string.start),false);
+			Log.e(tag,startOption+"");
+			if(!startOption)
+				return false;
 			ComponentName service = startService(new Intent(this, UsynergyService.class));
 			if (service == null) {
 				Log.e(tag, "Can't start service " + UsynergyService.class.getName());
@@ -122,13 +125,9 @@ public class MainActivity extends SherlockPreferenceActivity implements OnShared
 		AlertDialog.Builder builder = new AlertDialog.Builder(this);
 		LayoutInflater factory = LayoutInflater.from(this);
 		final View dialogView = factory.inflate(R.layout.about_alert_dialog, null);
-		builder.setIcon(getResources().getDrawable(R.drawable.ic_launcher)).setTitle(getString(R.string.about))
-				.setView(dialogView).setCancelable(true)
-				.setPositiveButton(getString(R.string.ok), new DialogInterface.OnClickListener() {
-					public void onClick(DialogInterface dialog, int id) {
-						dialog.dismiss();
-					}
-				}).show();
+		builder.setTitle(getString(R.string.about));
+		builder.setView(dialogView).setCancelable(true);
+		builder.show();
 	}
 
 	@Override
@@ -139,5 +138,4 @@ public class MainActivity extends SherlockPreferenceActivity implements OnShared
 			pref.setSummary(etp.getText());
 		}
 	}
-
 }
