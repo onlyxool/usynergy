@@ -22,4 +22,5 @@
 	<string name="edit">edit</string>
 	<string name="del">del</string>
 	<string name="defualtport">24800</string>
+	<string name="usynergyisrun">usynergy is running, have fun!</string>
 </resources>

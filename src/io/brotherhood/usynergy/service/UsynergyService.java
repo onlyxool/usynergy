@@ -41,6 +41,11 @@ public class UsynergyService extends Service {
 		runSynergyThread.start();
 	}
 
+	@Override
+	public int onStartCommand(Intent intent, int flags, int startId) {
+		return super.onStartCommand(intent, flags, startId);
+	}
+
 	class RunSynergyThread extends Thread {
 		public void run() {
 			init(screenName, height, width);

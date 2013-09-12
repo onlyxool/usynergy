@@ -7,7 +7,11 @@ import io.brotherhood.usynergy.service.UsynergyService;
 import io.brotherhood.usynergy.util.PhoneUtils;
 import io.brotherhood.usynergy.util.RootCmd;
 import android.app.AlertDialog;
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
@@ -34,6 +38,7 @@ public class MainActivity extends SherlockPreferenceActivity implements OnShared
 	private int height = 0;
 	public static final String defualtScreenName = "android";
 	private ServerListDao dao = null;
+	private NotificationManager nm = null;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -60,7 +65,11 @@ public class MainActivity extends SherlockPreferenceActivity implements OnShared
 		dao = new ServerListDao();
 
 		boolean haveRoot = RootCmd.rootCmd("chmod 666 /dev/uinput");
-		Log.i(tag, haveRoot + "");
+		Log.i(tag, "root=" + haveRoot);
+		if (!haveRoot) {
+
+		}
+		nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 	}
 
 	@Override
@@ -103,19 +112,22 @@ public class MainActivity extends SherlockPreferenceActivity implements OnShared
 			return false;
 		Log.i(tag, key);
 		if (key.equals(getString(R.string.start))) {
-			Boolean startOption = sharePre.getBoolean(getString(R.string.start),false);
-			Log.e(tag,startOption+"");
-			if(!startOption)
-				return false;
-			ComponentName service = startService(new Intent(this, UsynergyService.class));
-			if (service == null) {
-				Log.e(tag, "Can't start service " + UsynergyService.class.getName());
+			Boolean startOption = sharePre.getBoolean(getString(R.string.start), false);
+			Log.e(tag, startOption + "");
+			if (startOption){
+				ComponentName service = startService(new Intent(this, UsynergyService.class));
+				if (service == null) {
+					Log.e(tag, "Can't start service " + UsynergyService.class.getName());
+				}
+				notifiation();
+			}else{
+				cancelNotification();
 			}
 		} else if (key.equals(getString(R.string.serverlist))) {
 			Intent intent = new Intent(this, ServerlistActivity.class);
 			intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 			startActivity(intent);
-		} else if (key.equals(getString(R.string.about))){
+		} else if (key.equals(getString(R.string.about))) {
 			showAboutDialog();
 		}
 		return super.onPreferenceTreeClick(preferenceScreen, preference);
@@ -137,5 +149,22 @@ public class MainActivity extends SherlockPreferenceActivity implements OnShared
 			EditTextPreference etp = (EditTextPreference) pref;
 			pref.setSummary(etp.getText());
 		}
+	}
+
+	public void notifiation() {
+		Notification n = new Notification(R.drawable.ic_launcher, this.getString(R.string.app_name),
+				System.currentTimeMillis());
+
+		n.flags = Notification.FLAG_ONGOING_EVENT;
+		Intent i = new Intent(this, MainActivity.class);
+		i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+		PendingIntent contentIntent = PendingIntent.getActivity(this, R.string.app_name, i,
+				PendingIntent.FLAG_UPDATE_CURRENT);
+		n.setLatestEventInfo(this, getString(R.string.app_name), getString(R.string.usynergyisrun), contentIntent);
+		nm.notify(R.string.app_name, n);
+	}
+
+	public void cancelNotification(){
+		nm.cancel(R.string.app_name);
 	}
 }
