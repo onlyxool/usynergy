@@ -7,16 +7,14 @@ import io.brotherhood.usynergy.service.UsynergyService;
 import io.brotherhood.usynergy.util.PhoneUtils;
 import io.brotherhood.usynergy.util.RootCmd;
 import android.app.AlertDialog;
-import android.app.Notification;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.content.ComponentName;
-import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.os.Bundle;
+import android.preference.CheckBoxPreference;
 import android.preference.EditTextPreference;
 import android.preference.Preference;
 import android.preference.PreferenceManager;
@@ -24,6 +22,7 @@ import android.preference.PreferenceScreen;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.BaseAdapter;
 
 import com.actionbarsherlock.app.SherlockPreferenceActivity;
 import com.actionbarsherlock.view.Menu;
@@ -38,7 +37,7 @@ public class MainActivity extends SherlockPreferenceActivity implements OnShared
 	private int height = 0;
 	public static final String defualtScreenName = "android";
 	private ServerListDao dao = null;
-	private NotificationManager nm = null;
+	
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -69,7 +68,6 @@ public class MainActivity extends SherlockPreferenceActivity implements OnShared
 		if (!haveRoot) {
 
 		}
-		nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 	}
 
 	@Override
@@ -81,6 +79,11 @@ public class MainActivity extends SherlockPreferenceActivity implements OnShared
 			PreferenceScreen serverlist = (PreferenceScreen) findPreference(serverListKey);
 			serverlist.setSummary(obj.getFullAddress());
 		}
+//		getPreferenceManager().getSharedPreferences();
+		Log.i(tag, "start=" + getPreferenceManager().getSharedPreferences().getBoolean("start", false));
+		PreferenceScreen preferenceScreen = getPreferenceScreen();
+		BaseAdapter userScreenListAdapter = (BaseAdapter)preferenceScreen.getRootAdapter();
+		userScreenListAdapter.notifyDataSetChanged();
 	}
 
 	@Override
@@ -110,36 +113,38 @@ public class MainActivity extends SherlockPreferenceActivity implements OnShared
 		String key = preference.getKey();
 		if (key == null)
 			return false;
-		Log.i(tag, key);
+
 		if (key.equals(getString(R.string.start))) {
+			ServerEntity obj = dao.getSelectObj();
+			if (obj == null) {
+				SharedPreferences pre = preference.getSharedPreferences();
+				SharedPreferences.Editor editor = pre.edit();
+				editor.putBoolean(key, false);
+				editor.commit();
+				Log.i(tag, key + "=" + preference.getSharedPreferences().getBoolean(key, false));
+				showAddServerConfigDialog();
+				CheckBoxPreference cbp = (CheckBoxPreference) preference;
+				cbp.setChecked(false);
+				return false;
+			}
 			Boolean startOption = sharePre.getBoolean(getString(R.string.start), false);
 			Log.e(tag, startOption + "");
-			if (startOption){
+			if (startOption) {
 				ComponentName service = startService(new Intent(this, UsynergyService.class));
 				if (service == null) {
 					Log.e(tag, "Can't start service " + UsynergyService.class.getName());
 				}
-				notifiation();
-			}else{
-				cancelNotification();
+				
+			} else {
+				stopService(new Intent(this, UsynergyService.class));
+				
 			}
 		} else if (key.equals(getString(R.string.serverlist))) {
-			Intent intent = new Intent(this, ServerlistActivity.class);
-			intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-			startActivity(intent);
+			addServerConfig();
 		} else if (key.equals(getString(R.string.about))) {
-			showAboutDialog();
+			showMessageDialog();
 		}
 		return super.onPreferenceTreeClick(preferenceScreen, preference);
-	}
-
-	private void showAboutDialog() {
-		AlertDialog.Builder builder = new AlertDialog.Builder(this);
-		LayoutInflater factory = LayoutInflater.from(this);
-		final View dialogView = factory.inflate(R.layout.about_alert_dialog, null);
-		builder.setTitle(getString(R.string.about));
-		builder.setView(dialogView).setCancelable(true);
-		builder.show();
 	}
 
 	@Override
@@ -151,20 +156,30 @@ public class MainActivity extends SherlockPreferenceActivity implements OnShared
 		}
 	}
 
-	public void notifiation() {
-		Notification n = new Notification(R.drawable.ic_launcher, this.getString(R.string.app_name),
-				System.currentTimeMillis());
-
-		n.flags = Notification.FLAG_ONGOING_EVENT;
-		Intent i = new Intent(this, MainActivity.class);
-		i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-		PendingIntent contentIntent = PendingIntent.getActivity(this, R.string.app_name, i,
-				PendingIntent.FLAG_UPDATE_CURRENT);
-		n.setLatestEventInfo(this, getString(R.string.app_name), getString(R.string.usynergyisrun), contentIntent);
-		nm.notify(R.string.app_name, n);
+	private void addServerConfig() {
+		Intent intent = new Intent(this, ServerlistActivity.class);
+		intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+		startActivity(intent);
 	}
 
-	public void cancelNotification(){
-		nm.cancel(R.string.app_name);
+	private void showMessageDialog() {
+		AlertDialog.Builder builder = new AlertDialog.Builder(this);
+		LayoutInflater factory = LayoutInflater.from(this);
+		final View dialogView = factory.inflate(R.layout.about_alert_dialog, null);
+		builder.setTitle(getString(R.string.about));
+		builder.setView(dialogView).setCancelable(true);
+		builder.show();
+	}
+
+	private void showAddServerConfigDialog() {
+		AlertDialog.Builder builder = new AlertDialog.Builder(this);
+		builder.setMessage(R.string.noserverconfig);
+		builder.setIconAttribute(R.drawable.ic_launcher).setTitle(R.string.app_name)//.setView(textEntryView)
+				.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int whichButton) {
+						addServerConfig();
+						dialog.dismiss();
+					}
+				}).show();
 	}
 }

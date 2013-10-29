@@ -4,6 +4,7 @@ import io.brotherhood.usynergy.MainActivity;
 import io.brotherhood.usynergy.R;
 import io.brotherhood.usynergy.bean.ServerEntity;
 import io.brotherhood.usynergy.db.ServerListDao;
+import io.brotherhood.usynergy.util.App;
 import android.app.Service;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -24,6 +25,7 @@ public class UsynergyService extends Service {
 
 	@Override
 	public void onCreate() {
+		Log.e(tag, "onCreate");
 		sharePre = PreferenceManager.getDefaultSharedPreferences(this);
 		String screenNameKey = getString(R.string.screenname);
 		screenName = sharePre.getString(screenNameKey, MainActivity.defualtScreenName);
@@ -48,16 +50,21 @@ public class UsynergyService extends Service {
 
 	class RunSynergyThread extends Thread {
 		public void run() {
+			Log.i(tag, "run");
 			init(screenName, height, width);
 			int result = UsynergyService.this.start(obj.ipadd, Integer.parseInt(obj.port));
 			Log.e(tag, "result=" + result);
+			App.getInstance().notifiation();
 		}
 	};
 
 	@Override
 	public void onDestroy() {
+		Log.e(tag, "onDestroy");
 		super.onDestroy();
 		shutdown();
+		App.getInstance().cancelNotification();
+		Toast.makeText(getApplicationContext(), R.string.usynergyisshutdown, Toast.LENGTH_SHORT).show();
 		exit();
 	}
 
@@ -77,6 +84,10 @@ public class UsynergyService extends Service {
 	public native int exit();
 
 	public native String getClipBoardText();
+
+	public native int getX();
+	
+	public native int getY();
 
 	static {
 		System.loadLibrary("usynercore");

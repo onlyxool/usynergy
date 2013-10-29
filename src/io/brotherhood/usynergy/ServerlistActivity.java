@@ -37,6 +37,7 @@ public class ServerlistActivity extends SherlockActivity implements OnCreateCont
 		setTheme(R.style.Theme_Sherlock);
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_serverlist);
+		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
 		dao = new ServerListDao();
 		serverList = dao.getList();

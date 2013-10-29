@@ -68,9 +68,8 @@ jint Java_io_brotherhood_usynergy_service_UsynergyService_start(JNIEnv *env, job
 
 	uSynergyLinuxContext.m_cookie->ipAddr = strcpy(ipStr, jstringTostring(env,ip));
 	uSynergyLinuxContext.m_cookie->port = port;
-
-	uSynergyStart(&uSynergyLinuxContext);
 	LOGI("start = %s:%d", ipStr, port);
+	uSynergyStart(&uSynergyLinuxContext);
 }
 
 /*
@@ -93,9 +92,15 @@ jint Java_io_brotherhood_usynergy_service_UsynergyService_setClientName(JNIEnv *
 	uSynergyInit(&uSynergyLinuxContext, clientName, height, width);
 }
 
-jint Java_io_brotherhood_usynergy_service_UsynergyService_exit(JNIEnv *env)
+jint Java_io_brotherhood_usynergy_service_UsynergyService_exit(JNIEnv *env,jobject thiz)
 {
 	uSynergCleanUP(&uSynergyLinuxContext);
 }
 
+jint Java_io_brotherhood_usynergy_service_getX(JNIEnv *env,jobject thiz){
 
+}
+
+jint Java_io_brotherhood_usynergy_service_getY(JNIEnv *env,jobject thiz){
+
+}
