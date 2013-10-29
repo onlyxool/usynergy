@@ -86,7 +86,7 @@ public class UsynergyService extends Service {
 	public native String getClipBoardText();
 
 	public native int getX();
-	
+
 	public native int getY();
 
 	static {

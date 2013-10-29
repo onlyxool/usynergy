@@ -22,7 +22,6 @@ import android.preference.PreferenceScreen;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.BaseAdapter;
 
 import com.actionbarsherlock.app.SherlockPreferenceActivity;
 import com.actionbarsherlock.view.Menu;
@@ -37,7 +36,6 @@ public class MainActivity extends SherlockPreferenceActivity implements OnShared
 	private int height = 0;
 	public static final String defualtScreenName = "android";
 	private ServerListDao dao = null;
-	
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -79,11 +77,6 @@ public class MainActivity extends SherlockPreferenceActivity implements OnShared
 			PreferenceScreen serverlist = (PreferenceScreen) findPreference(serverListKey);
 			serverlist.setSummary(obj.getFullAddress());
 		}
-//		getPreferenceManager().getSharedPreferences();
-		Log.i(tag, "start=" + getPreferenceManager().getSharedPreferences().getBoolean("start", false));
-		PreferenceScreen preferenceScreen = getPreferenceScreen();
-		BaseAdapter userScreenListAdapter = (BaseAdapter)preferenceScreen.getRootAdapter();
-		userScreenListAdapter.notifyDataSetChanged();
 	}
 
 	@Override
@@ -134,10 +127,8 @@ public class MainActivity extends SherlockPreferenceActivity implements OnShared
 				if (service == null) {
 					Log.e(tag, "Can't start service " + UsynergyService.class.getName());
 				}
-				
 			} else {
 				stopService(new Intent(this, UsynergyService.class));
-				
 			}
 		} else if (key.equals(getString(R.string.serverlist))) {
 			addServerConfig();
@@ -174,7 +165,7 @@ public class MainActivity extends SherlockPreferenceActivity implements OnShared
 	private void showAddServerConfigDialog() {
 		AlertDialog.Builder builder = new AlertDialog.Builder(this);
 		builder.setMessage(R.string.noserverconfig);
-		builder.setIconAttribute(R.drawable.ic_launcher).setTitle(R.string.app_name)//.setView(textEntryView)
+		builder.setIconAttribute(R.drawable.ic_launcher).setTitle(R.string.app_name)// .setView(textEntryView)
 				.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
 					public void onClick(DialogInterface dialog, int whichButton) {
 						addServerConfig();
