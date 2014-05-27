@@ -1,4 +1,6 @@
+#include <log.h>
 #include <string.h>
+#include <errno.h>
 
 #include "platform.h"
 #include "suinput.h"
@@ -28,14 +30,20 @@ static uSynergyBool uSynergyReceiveFunc(uSynergyCookie cookie, uint8_t *buffer,
 	int maxLength, int* outLength)
 {
 	int ret;
-	ret = recv(cookie->sockfd, buffer, maxLength, 0);
-	if (ret <= 0) {
-		perror("receive error");
-		return USYNERGY_FALSE;
-	}
 
-	*outLength = ret;
-	return USYNERGY_TRUE;
+	while (1) {
+		ret = recv(cookie->sockfd, buffer, maxLength, 0);
+		if (ret > 0) {
+			*outLength = ret;
+			return USYNERGY_TRUE;
+		} else if ((ret < 0) && (errno == EAGAIN || errno == EWOULDBLOCK
+			|| errno == EINTR)) {
+			continue;
+		}
+		perror("receive error");
+		break;
+	}
+	return USYNERGY_FALSE;
 }
 
 static uSynergyBool uSynergySendFunc(uSynergyCookie cookie,
@@ -98,9 +106,7 @@ static void uSynergyScreenActiveCallback(uSynergyCookie cookie,
 static uSynergyBool uSynergyMouseMoveCallback(uSynergyCookie cookie,
 	int32_t x, int32_t y)
 {
-	int ret;
-	ret = suinput_move_pointer(cookie->uinput_mouse, x, y);
-	return USYNERGY_TRUE;
+	return suinput_move_pointer(cookie->uinput_mouse, x, y);
 }
 
 static uSynergyBool uSynergyMouseUpCallback(uSynergyCookie cookie,

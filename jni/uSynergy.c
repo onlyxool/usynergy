@@ -157,23 +157,29 @@ static uSynergyBool sSendReply(uSynergyContext *context)
 /*
  * @brief Call mouse callback after a mouse event
  */
-static void sSendMouseMoveCallback(uSynergyContext *context)
+static void sSendMouseMoveCallback(uSynergyContext *context,
+	int32_t x, int32_t y)
 {
-	// Skip if no callback is installed
 	if (context->m_mouseMoveCallback == NULL)
 		return;
 
-	// Send callback
-	uSynergyBool ret;
-	int32_t rel_x = context->m_mouseX - context->m_mouseX_old;
-	int32_t rel_y = context->m_mouseY - context->m_mouseY_old;
-	ret = context->m_mouseMoveCallback(context->m_cookie, rel_x, rel_y);
+	if (x == context->m_mouseX && y == context->m_mouseY)
+		return;
 
-	if (ret == USYNERGY_TRUE) {
-//		printf("%d:%d -> %d:%d\n", context->m_mouseX_old,
-//			context->m_mouseY_old, context->m_mouseX, context->m_mouseY);
-		context->m_mouseX_old = context->m_mouseX;
-		context->m_mouseY_old = context->m_mouseY;
+	uSynergyBool ret;
+	ret = context->m_mouseMoveCallback(context->m_cookie,
+		x - context->m_mouseX, y - context->m_mouseY);
+	if (!ret) {
+		//LOGI("%d:%d -> %d:%d\n", context->m_mouseX_old,
+		//	context->m_mouseY_old, context->m_mouseX, context->m_mouseY);
+		//printf("%d:%d -> %d:%d\n", context->m_mouseX_old,context->m_mouseY_old, context->m_mouseX, context->m_mouseY);
+		context->m_mouseX = x;
+		context->m_mouseY = y;
+	} else {
+		//printf("iiiiiiiii %d ooooooo  %d:%d -> %d:%d\n",ret, context->m_mouseX_old,
+		//	context->m_mouseY_old, context->m_mouseX, context->m_mouseY);
+		//LOGI("iiiiiiiii %d ooooooo  %d:%d -> %d:%d\n", ret, context->m_mouseX_old,
+		//	context->m_mouseY_old, context->m_mouseX, context->m_mouseY);
 	}
 }
 
@@ -351,9 +357,7 @@ static void sProcessMessage(uSynergyContext *context, const uint8_t *message)
 	} else if (USYNERGY_IS_PACKET("DMMV")) {
 		// Mouse move. Reply with CNOP
 		// kMsgDMouseMove = "DMMV%2i%2i"
-		context->m_mouseX = sNetToNative16(message+8);
-		context->m_mouseY = sNetToNative16(message+10);
-		sSendMouseMoveCallback(context);
+		sSendMouseMoveCallback(context, sNetToNative16(message+8), sNetToNative16(message+10));
 
 	} else if (USYNERGY_IS_PACKET("DMWM")) {
 		// Mouse wheel
@@ -370,7 +374,7 @@ static void sProcessMessage(uSynergyContext *context, const uint8_t *message)
 		uint16_t id = sNetToNative16(message+8);
 		uint16_t mod = sNetToNative16(message+10);
 		uint16_t key = sNetToNative16(message+12);
-		printf("id:%d key:%d mod:%d\n", id, key, mod);
+		//LOGI("id:%d key:%d mod:%d\n", id, key, mod);
 		sSendKeyboardCallback(context, keyTranslation[id], mod, USYNERGY_TRUE, USYNERGY_FALSE);
 
 	} else if (USYNERGY_IS_PACKET("DKRP")) {
@@ -484,7 +488,7 @@ static void sProcessMessage(uSynergyContext *context, const uint8_t *message)
 		char buffer[64];
 		sprintf(buffer, "Unknown packet '%c%c%c%c'", message[4], message[5],
 			message[6], message[7]);
-		printf("Unknown packet '%c%c%c%c'\n", message[4], message[5],
+		LOGI("Unknown packet '%c%c%c%c'\n", message[4], message[5],
 			message[6], message[7]);
 		sTrace(context, buffer);
 		return;
@@ -529,7 +533,7 @@ void *sRecvData(void *arg)
 		recvSumLen = packlen + 4;
 
 		while (1) {
-//printf("packlen::%d %c%c%c%c\n", packlen, *(packhead+4), *(packhead+5), *(packhead+6), *(packhead+7));
+//LOGI("packlen::%d %c%c%c%c\n", packlen, *(packhead+4), *(packhead+5), *(packhead+6), *(packhead+7));
 			if (recvSumLen < num_received + netrecvOfs) {
 				memcpy(context->m_receiveBuffer + context->m_receiveOfs,
 					packhead, packlen + 4);
@@ -579,7 +583,10 @@ static void sUpdateContext(uSynergyContext *context)
 		packlen = sNetToNative32(context->m_receiveBuffer);
 //		if (packlen+4 <= context->m_receiveOfs) {
 		if (packlen > 0) {
-//			printf("%c%c%c%c offset:%d packlen:%d\n", context->m_receiveBuffer[4],
+//printf("%c%c%c%c offset:%d packlen:%d\n", context->m_receiveBuffer[4],
+//context->m_receiveBuffer[5], context->m_receiveBuffer[6],
+//context->m_receiveBuffer[7], context->m_receiveOfs,packlen);
+//			LOGI("%c%c%c%c offset:%d packlen:%d\n", context->m_receiveBuffer[4],
 //				context->m_receiveBuffer[5], context->m_receiveBuffer[6],
 //				context->m_receiveBuffer[7], context->m_receiveOfs,packlen);
 

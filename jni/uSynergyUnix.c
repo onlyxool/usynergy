@@ -31,8 +31,9 @@ extern uSynergyContext uSynergyLinuxContext;
 int main(int argc, char **argv)
 {
 	char* ipStr;
+	ipStr = malloc(strlen(argv[1]) + 1);
 
-	uSynergyInit(&uSynergyLinuxContext, "Android", 1024, 600);
+	uSynergyInit(&uSynergyLinuxContext, "android", 1024, 600);
 
 	uSynergyLinuxContext.m_cookie->ipAddr = strcpy(ipStr, argv[1]);
 	uSynergyLinuxContext.m_cookie->port = 24800;
