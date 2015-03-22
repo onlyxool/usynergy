@@ -21,6 +21,8 @@ your android must have /dev/uinput module and this file can be RW by app.
 
 ## 2. How to use it
 
+Try to read synerg's [user guide][6]. usynergy is almost same.
+
 ## 3. Acknowledgements
 
 * [Alex Evans][3] & [Michiel van der Leeuw][4]  (uSynergy client)
@@ -31,3 +33,4 @@ your android must have /dev/uinput module and this file can be RW by app.
 [3]:http://en.wikipedia.org/wiki/Alex_Evans_(video_game_developer)
 [4]:http://en.wikipedia.org/wiki/Michiel_van_der_Leeuw
 [5]:tuos@codegrove.org
+[6]:http://synergy-project.org/wiki/User_Guide
